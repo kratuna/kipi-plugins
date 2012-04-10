@@ -28,13 +28,16 @@
 // Qt includes
 
 #include <QWidget>
+#include <QScrollArea>
+#include <QComboBox>
+#include <QStringList>
 
 //KDE includes
 
 #include <klineedit.h>
 #include <ktextedit.h>
 #include <kconfig.h>
-#include <kurlrequester.h>
+
 #include <kurl.h>
 
 class QLabel;
@@ -95,7 +98,7 @@ public:
     KPProgressWidget* progressBar() const;
 
     QString author() const;
-    QString licence() const;
+    QString license() const;
 
     void readSettings(KConfigGroup& group);
     void saveSettings(KConfigGroup& group);
@@ -110,6 +113,8 @@ private Q_SLOTS:
     void slotResizeChecked();
     void slotChangeUserClicked();
     void slotLoginClicked();
+    void slotNewWikiClicked();
+    void slotAddWikiClicked();
 
 private:
 
@@ -118,7 +123,10 @@ private:
     QLabel*                    m_loginHeaderLbl;
     KLineEdit*                 m_nameEdit;
     KLineEdit*                 m_passwdEdit;
-    KUrlComboRequester*        m_wikiSelect;
+    QScrollArea*               m_newWikiSv;
+    KLineEdit*                 m_newWikiNameEdit;
+    KLineEdit*                 m_newWikiUrlEdit;
+    QComboBox*                 m_wikiSelect;
 
     QWidget*                   m_textBox;
 
@@ -133,16 +141,18 @@ private:
     QCheckBox*                 m_resizeChB;
     QSpinBox*                  m_dimensionSpB;
     QSpinBox*                  m_imageQualitySpB;
-    SqueezedComboBox*          m_licenceComboBox;
+    SqueezedComboBox*          m_licenseComboBox;
 
     KPProgressWidget*          m_progressBar;
 
     RExpanderBox*              m_settingsExpander;
     KPImagesList*              m_imgList;
     UploadWidget*              m_uploadWidget;
-    
-    KUrl::List                 m_history;
-    
+
+    QStringList    m_WikisHistory;
+    QStringList     m_UrlsHistory;
+
+
     friend class WmWindow;
 };
 

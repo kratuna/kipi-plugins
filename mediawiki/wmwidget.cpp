@@ -32,6 +32,7 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QProgressBar>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -39,6 +40,7 @@
 #include <QComboBox>
 #include <QScrollArea>
 #include <QMap>
+#include <QTabWidget>
 
 // KDE includes
 
@@ -95,6 +97,14 @@ WmWidget::WmWidget(QWidget* const parent)
     sv->setAutoFillBackground(false);
     sv->viewport()->setAutoFillBackground(false);
 
+    QScrollArea* config = new QScrollArea(this);
+    KVBox* panel2    = new KVBox(config->viewport());
+    panel2->setAutoFillBackground(false);
+    config->setWidget(panel2);
+    config->setWidgetResizable(true);
+    config->setAutoFillBackground(false);
+    config->viewport()->setAutoFillBackground(false);
+
     m_headerLbl = new QLabel(panel);
     m_headerLbl->setWhatsThis(i18n("This is a clickable link to open the Wikimedia home page in a web browser."));
     m_headerLbl->setOpenExternalLinks(true);
@@ -110,25 +120,97 @@ WmWidget::WmWidget(QWidget* const parent)
     m_loginBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* loginBoxLayout = new QGridLayout(m_loginBox);
 
-    m_wikiSelect = new KUrlComboRequester(m_loginBox);
+    m_wikiSelect = new QComboBox(m_loginBox);
+
     m_nameEdit   = new KLineEdit(m_loginBox);
     m_passwdEdit = new KLineEdit(m_loginBox);
     m_passwdEdit->setEchoMode(KLineEdit::Password);
 
-    if(m_wikiSelect->button())
-        m_wikiSelect->button()->hide();
-    
-    m_wikiSelect->comboBox()->setEditable(true);
+    m_wikiSelect->addItem(i18n("kamelopedia"),
+                                              QString("http://kamelopedia.mormo.org/api.php"));
+    m_wikiSelect->addItem(i18n("MediaWiki"),
+                                              QString("http://www.mediawiki.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikia:foto"),
+                                              QString("http://foto.wikia.com/api.php"));
+    m_wikiSelect->addItem(i18n("Wikia:uncyclopedia"),
+                                              QString("http://uncyclopedia.wikia.com/api.php"));
+    m_wikiSelect->addItem(i18n("Wikimedia:commons"),
+                                              QString("http://commons.wikimedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikimedia:meta"),
+                                              QString("http://meta.wikimedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikibooks"),
+                                              QString("http://en.wikibooks.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikinews"),
+                                              QString("http://en.wikinews.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikipedia"),
+                                              QString("http://en.wikipedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikiquote"),
+                                              QString("http://en.wikiquote.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikisource"),
+                                              QString("http://en.wikinews.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wiktionary"),
+                                              QString("http://en.wiktionary.org/w/api.php"));
+
+
+    m_wikiSelect->setEditable(false);
+
 
     QLabel* wikiLabel     = new QLabel(m_loginBox);
     wikiLabel->setText(i18n("Wiki:"));
+
+    KPushButton* newWikiBtn       = new KPushButton(
+            KGuiItem(i18n("New"), "list-add",
+                     i18n("Create new wiki")), m_loginBox);
+
+//---newWiki---
+
+    m_newWikiSv = new QScrollArea(this);
+    KVBox* newWikiPanel    = new KVBox(m_newWikiSv->viewport());
+    newWikiPanel->setAutoFillBackground(false);
+    m_newWikiSv->setWidget(newWikiPanel);
+    m_newWikiSv->setWidgetResizable(true);
+    m_newWikiSv->setAutoFillBackground(false);
+    m_newWikiSv->viewport()->setAutoFillBackground(false);
+    m_newWikiSv->setVisible(false);
+
+    QWidget* newWikiBox                  = new QWidget(newWikiPanel);
+    newWikiBox->setWhatsThis(i18n("These are options for adding a Wiki."));
+
+    QGridLayout* newWikiLayout = new QGridLayout(newWikiBox);
+
+    QLabel*  newWikiNameLabel     = new QLabel(newWikiPanel);
+    newWikiNameLabel->setText(i18n("Wiki:"));
+
+
+    QLabel*  newWikiUrlLabel     = new QLabel(newWikiPanel);
+    newWikiUrlLabel->setText(i18n("Url:"));
+
+
+    m_newWikiNameEdit = new KLineEdit(newWikiPanel);
+
+    m_newWikiUrlEdit = new KLineEdit(newWikiPanel);
+
+
+    KPushButton* addWikiBtn       = new KPushButton(
+            KGuiItem(i18n("Add"), "list-add",
+                     i18n("add new wiki")), newWikiPanel);
+
+
+    newWikiLayout->addWidget(newWikiNameLabel, 0, 0, 1, 1);
+    newWikiLayout->addWidget(m_newWikiNameEdit, 0, 1, 1, 1);
+    newWikiLayout->addWidget(newWikiUrlLabel, 1, 0, 1, 1);
+    newWikiLayout->addWidget(m_newWikiUrlEdit, 1, 1, 1, 1);
+    newWikiLayout->addWidget(addWikiBtn, 2, 1, 1, 1);
+
+
+
 
     QLabel* nameLabel     = new QLabel(m_loginBox);
     nameLabel->setText(i18n( "Login:" ));
 
     QLabel* passwdLabel   = new QLabel(m_loginBox);
     passwdLabel->setText(i18n("Password:"));
-    
+
     QPushButton* loginBtn = new QPushButton(m_loginBox);
     loginBtn->setAutoDefault(true);
     loginBtn->setDefault(true);
@@ -136,11 +218,14 @@ WmWidget::WmWidget(QWidget* const parent)
 
     loginBoxLayout->addWidget(wikiLabel,    0, 0, 1, 1);
     loginBoxLayout->addWidget(m_wikiSelect, 0, 1, 1, 1);
-    loginBoxLayout->addWidget(nameLabel,    1, 0, 1, 1);
-    loginBoxLayout->addWidget(m_nameEdit,   1, 1, 1, 1);
-    loginBoxLayout->addWidget(m_passwdEdit, 2, 1, 1, 1);
-    loginBoxLayout->addWidget(passwdLabel,  2, 0, 1, 1);
-    loginBoxLayout->addWidget(loginBtn,     3, 0, 1, 1);
+    loginBoxLayout->addWidget(newWikiBtn, 0, 2, 1, 1);
+    loginBoxLayout->addWidget(m_newWikiSv,    1, 1, 3, 3);
+
+    loginBoxLayout->addWidget(nameLabel,    4, 0, 1, 1);
+    loginBoxLayout->addWidget(m_nameEdit,   4, 1, 1, 1);
+    loginBoxLayout->addWidget(m_passwdEdit, 5, 1, 1, 1);
+    loginBoxLayout->addWidget(passwdLabel,  5, 0, 1, 1);
+    loginBoxLayout->addWidget(loginBtn,     6, 0, 1, 1);
     loginBoxLayout->setObjectName("m_loginBoxLayout");
 
     m_accountBox         = new KHBox(m_userBox);
@@ -168,36 +253,36 @@ WmWidget::WmWidget(QWidget* const parent)
     QLabel* aut          = new QLabel(i18n("Author:"), m_textBox);
     m_authorEdit         = new KLineEdit(m_textBox);
 
-    QLabel* licenceLabel = new QLabel(i18n("License:"), m_textBox);
-    m_licenceComboBox    = new SqueezedComboBox(m_textBox);
+    QLabel* licenseLabel = new QLabel(i18n("License:"), m_textBox);
+    m_licenseComboBox    = new SqueezedComboBox(m_textBox);
 
-    m_licenceComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and GFDL"), 
+    m_licenseComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and GFDL"),
                                 QString("{{self|cc-by-sa-3.0|GFDL|migration=redundant}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and older"), 
+    m_licenseComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and older"),
                                 QString("{{self|cc-by-sa-3.0,2.5,2.0,1.0}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Creative Commons Attribution-Share Alike 3.0"),
+    m_licenseComboBox->addSqueezedItem(i18n("Creative Commons Attribution-Share Alike 3.0"),
                                 QString("{{self|cc-by-sa-3.0}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Own work, Creative Commons Attribution 3.0"),
+    m_licenseComboBox->addSqueezedItem(i18n("Own work, Creative Commons Attribution 3.0"),
                                 QString("{{self|cc-by-3.0}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Own work, release into public domain under the CC-Zero license"),
+    m_licenseComboBox->addSqueezedItem(i18n("Own work, release into public domain under the CC-Zero license"),
                                 QString("{{self|cc-zero}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Author died more than 100 years ago"),
+    m_licenseComboBox->addSqueezedItem(i18n("Author died more than 100 years ago"),
                                 QString("{{PD-old}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Photo of a two-dimensional work whose author died more than 100 years ago"),
+    m_licenseComboBox->addSqueezedItem(i18n("Photo of a two-dimensional work whose author died more than 100 years ago"),
                                 QString("{{PD-art}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("First published in the United States before 1923"),
+    m_licenseComboBox->addSqueezedItem(i18n("First published in the United States before 1923"),
                                 QString("{{PD-US}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Work of a U.S. government agency"),
+    m_licenseComboBox->addSqueezedItem(i18n("Work of a U.S. government agency"),
                                 QString("{{PD-USGov}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Simple typefaces, individual words or geometric shapes"),
+    m_licenseComboBox->addSqueezedItem(i18n("Simple typefaces, individual words or geometric shapes"),
                                 QString("{{PD-text}}"));
-    m_licenceComboBox->addSqueezedItem(i18n("Logos with only simple typefaces, individual words or geometric shapes"),
+    m_licenseComboBox->addSqueezedItem(i18n("Logos with only simple typefaces, individual words or geometric shapes"),
                                 QString("{{PD-textlogo}}"));
 
     textBoxLayout->addWidget(aut,               1, 0, 1, 1);
     textBoxLayout->addWidget(m_authorEdit,      1, 2, 1, 2);
-    textBoxLayout->addWidget(licenceLabel,      3, 0, 1, 1);
-    textBoxLayout->addWidget(m_licenceComboBox, 3, 2, 1, 2);
+    textBoxLayout->addWidget(licenseLabel,      3, 0, 1, 1);
+    textBoxLayout->addWidget(m_licenseComboBox, 3, 2, 1, 2);
     textBoxLayout->setObjectName("m_textBoxLayout");
 
     m_settingsExpander->addItem(m_textBox, i18n("Information"), QString("information"), true);
@@ -221,7 +306,7 @@ WmWidget::WmWidget(QWidget* const parent)
     m_dimensionSpB->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_dimensionSpB->setEnabled(false);
     QLabel* dimensionLbl = new QLabel(i18n("Maximum size:"), m_optionsBox);
-  
+
     m_imageQualitySpB = new QSpinBox(m_optionsBox);
     m_imageQualitySpB->setMinimum(0);
     m_imageQualitySpB->setMaximum(100);
@@ -243,6 +328,12 @@ WmWidget::WmWidget(QWidget* const parent)
     m_settingsExpander->setItemIcon(2, SmallIcon("system-run"));
 
     // ------------------------------------------------------------------------
+    QTabWidget* tabWidget;
+    tabWidget =  new QTabWidget;
+    tabWidget->addTab(sv, "Upload");
+    tabWidget->addTab(config,"Config");
+
+    // ------------------------------------------------------------------------
 
     m_progressBar = new KPProgressWidget(panel);
     m_progressBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -251,7 +342,7 @@ WmWidget::WmWidget(QWidget* const parent)
     // ------------------------------------------------------------------------
 
     mainLayout->addWidget(m_imgList);
-    mainLayout->addWidget(sv);
+    mainLayout->addWidget(tabWidget);
     mainLayout->setSpacing(KDialog::spacingHint());
     mainLayout->setMargin(0);
 
@@ -267,6 +358,12 @@ WmWidget::WmWidget(QWidget* const parent)
 
     connect(loginBtn, SIGNAL(clicked()),
             this, SLOT(slotLoginClicked()));
+
+    connect(newWikiBtn, SIGNAL(clicked()),
+            this, SLOT(slotNewWikiClicked()));
+
+    connect(addWikiBtn, SIGNAL(clicked()),
+            this, SLOT(slotAddWikiClicked()));
 }
 
 WmWidget::~WmWidget()
@@ -288,11 +385,13 @@ void WmWidget::readSettings(KConfigGroup& group)
     m_imageQualitySpB->setValue(group.readEntry("Quality", 85));
     slotResizeChecked();
 
-    m_history = group.readEntry("Urls history", QStringList());
+    m_WikisHistory = group.readEntry("Wikis history", QStringList());
+    m_UrlsHistory = group.readEntry("Urls history", QStringList());
 
-    foreach(KUrl url, m_history)
-    {
-        m_wikiSelect->comboBox()->addUrl(url);
+    if(m_UrlsHistory.size() != 0 && m_WikisHistory.size() != 0){
+        for(int i = 0 ; i < m_UrlsHistory.size() ; i++){
+            m_wikiSelect->addItem(m_WikisHistory.at(i),m_UrlsHistory.at(i));
+        }
     }
 }
 
@@ -310,8 +409,7 @@ void WmWidget::saveSettings(KConfigGroup& group)
     group.writeEntry("Dimension",    m_dimensionSpB->value());
     group.writeEntry("Quality",      m_imageQualitySpB->value());
 
-    m_history.append(m_wikiSelect->url());
-    group.writeEntry("Urls history", m_history.toStringList());
+
 }
 
 KPImagesList* WmWidget::imagesList() const
@@ -371,7 +469,36 @@ void WmWidget::slotChangeUserClicked()
 
 void WmWidget::slotLoginClicked()
 {
-    emit signalLoginRequest(m_nameEdit->text(), m_passwdEdit->text(), m_wikiSelect->url());
+     emit signalLoginRequest(m_nameEdit->text(), m_passwdEdit->text(), m_wikiSelect->itemData(m_wikiSelect->currentIndex()).toUrl());
+
+}
+
+void WmWidget::slotNewWikiClicked()
+{
+    if(m_newWikiSv->isVisible()){
+        m_newWikiSv->setVisible(false);
+
+    }else{
+        m_newWikiSv->setVisible(true);
+    }
+}
+void WmWidget::slotAddWikiClicked()
+{
+
+    KConfig config("kipirc");
+    KConfigGroup group = config.group(QString("Wikimedia Commons settings"));
+
+    m_UrlsHistory << m_newWikiUrlEdit->userText();
+    group.writeEntry("Urls history", m_UrlsHistory);
+
+    m_WikisHistory << m_newWikiNameEdit->userText();
+    group.writeEntry("Wikis history", m_WikisHistory);
+
+    m_wikiSelect->addItem(m_newWikiNameEdit->userText(),m_newWikiUrlEdit->userText());
+    m_wikiSelect->setCurrentIndex(m_wikiSelect->count()-1);
+    this->slotNewWikiClicked();
+
+
 }
 
 QString WmWidget::author() const
@@ -380,10 +507,10 @@ QString WmWidget::author() const
     return m_authorEdit->text();
 }
 
-QString WmWidget::licence() const
+QString WmWidget::license() const
 {
-    kDebug() << "WmWidget::licence()";
-    return m_licenceComboBox->itemData(m_licenceComboBox->currentIndex()).toString();
+    kDebug() << "WmWidget::license()";
+    return m_licenseComboBox->itemData(m_licenseComboBox->currentIndex()).toString();
 }
 
 } // namespace KIPIWikimediaPlugin
