@@ -191,7 +191,7 @@ void WMWindow::slotStartTransfer()
 
     QList<QMap<QString, QString> > imageDesc;
     QString author  = m_widget->author();
-    QString licence = m_widget->licence();
+    QString license = m_widget->license();
     QString category;
 
     for (int i = 0; i < urls.size(); ++i)
@@ -202,7 +202,7 @@ void WMWindow::slotStartTransfer()
         QMap<QString, QString> map;
 
         map["url"]         = urls.at(i).url();
-        map["licence"]     = licence;
+        map["license"]     = license;
         map["author"]      = author;
         map["description"] = info.description();
         map["time"]        = info.date().toString(Qt::ISODate);
