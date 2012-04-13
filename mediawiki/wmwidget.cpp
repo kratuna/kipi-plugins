@@ -23,7 +23,6 @@
  * ============================================================ */
 
 #include "wmwidget.moc"
-
 // Qt includes
 
 #include <QLabel>
@@ -87,15 +86,69 @@ WmWidget::WmWidget(QWidget* const parent)
     m_imgList->loadImagesFromCurrentSelection();
     m_imgList->listView()->setWhatsThis(i18n("This is the list of images to upload to your Wikimedia account."));
 
-    // ------------------------------------------------------------------------
+     // *****************************Tab Upload****************************************
 
-    QScrollArea* sv = new QScrollArea(this);
-    KVBox* panel    = new KVBox(sv->viewport());
+    QScrollArea* upload = new QScrollArea(this);
+    KVBox* panel    = new KVBox(upload->viewport());
     panel->setAutoFillBackground(false);
-    sv->setWidget(panel);
-    sv->setWidgetResizable(true);
-    sv->setAutoFillBackground(false);
-    sv->viewport()->setAutoFillBackground(false);
+    upload->setWidget(panel);
+    upload->setWidgetResizable(true);
+    upload->setAutoFillBackground(false);
+    upload->viewport()->setAutoFillBackground(false);
+
+
+
+    m_headerLbl = new QLabel(panel);
+    m_headerLbl->setWhatsThis(i18n("This is a clickable link to open the Wikimedia home page in a web browser."));
+    m_headerLbl->setOpenExternalLinks(true);
+    m_headerLbl->setFocusPolicy(Qt::NoFocus);
+
+
+    m_uploadBox    = new KVBox(panel);
+    m_fileBox   = new QWidget(m_uploadBox);
+    m_fileBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
+    QGridLayout* fileBoxLayout = new QGridLayout(m_fileBox);
+
+    m_titleEdit   = new KLineEdit(m_fileBox);
+    m_descEdit   = new KLineEdit(m_fileBox);
+    m_dateEdit   = new KLineEdit(m_fileBox);
+    m_longitudeEdit   = new KLineEdit(m_fileBox);
+    m_latitudeEdit   = new KLineEdit(m_fileBox);
+    m_categoryEdit   = new KLineEdit(m_fileBox);
+
+    QLabel* titleLabel     = new QLabel(m_fileBox);
+    titleLabel->setText(i18n("Title:"));
+    QLabel* descLabel     = new QLabel(m_fileBox);
+    descLabel->setText(i18n("description:"));
+    QLabel* dateLabel     = new QLabel(m_fileBox);
+    dateLabel->setText(i18n("date:"));
+    QLabel* longitudeLabel     = new QLabel(m_fileBox);
+    longitudeLabel->setText(i18n("Longitude:"));
+    QLabel* latitudeLabel     = new QLabel(m_fileBox);
+    latitudeLabel->setText(i18n("Latitude:"));
+    QLabel* categoryLabel     = new QLabel(m_fileBox);
+    categoryLabel->setText(i18n("Category:"));
+
+    KPushButton* applyBtn       = new KPushButton(
+            KGuiItem(i18n("apply"), "list-add",
+                     i18n("upply config")), m_loginBox);
+
+    fileBoxLayout->addWidget(titleLabel, 0, 0, 1, 1);
+    fileBoxLayout->addWidget(descLabel, 1, 0, 1, 1);
+    fileBoxLayout->addWidget(dateLabel, 2, 0, 1, 1);
+    fileBoxLayout->addWidget(longitudeLabel, 3, 0, 1, 1);
+    fileBoxLayout->addWidget(latitudeLabel, 4, 0, 1, 1);
+    fileBoxLayout->addWidget(categoryLabel, 5, 0, 1, 1);
+
+    fileBoxLayout->addWidget(m_titleEdit, 0, 1, 1, 4);
+    fileBoxLayout->addWidget(m_descEdit, 1, 1, 1, 4);
+    fileBoxLayout->addWidget(m_dateEdit, 2, 1, 1, 4);
+    fileBoxLayout->addWidget(m_longitudeEdit, 3, 1, 1, 4);
+    fileBoxLayout->addWidget(m_latitudeEdit, 4, 1, 1, 4);
+    fileBoxLayout->addWidget(m_categoryEdit, 5, 1, 1, 4);
+
+    fileBoxLayout->addWidget(applyBtn, 6, 4, 1, 1);
+     // *****************************Tab Config****************************************
 
     QScrollArea* config = new QScrollArea(this);
     KVBox* panel2    = new KVBox(config->viewport());
@@ -105,17 +158,10 @@ WmWidget::WmWidget(QWidget* const parent)
     config->setAutoFillBackground(false);
     config->viewport()->setAutoFillBackground(false);
 
-    m_headerLbl = new QLabel(panel);
-    m_headerLbl->setWhatsThis(i18n("This is a clickable link to open the Wikimedia home page in a web browser."));
-    m_headerLbl->setOpenExternalLinks(true);
-    m_headerLbl->setFocusPolicy(Qt::NoFocus);
-
-    m_settingsExpander = new RExpanderBox(panel);
+    m_settingsExpander = new RExpanderBox(panel2);
     m_settingsExpander->setObjectName("MediaWiki Settings Expander");
 
-    // ------------------------------------------------------------------------
-
-    m_userBox    = new KVBox(panel);
+    m_userBox    = new KVBox(panel2);
     m_loginBox   = new QWidget(m_userBox);
     m_loginBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* loginBoxLayout = new QGridLayout(m_loginBox);
@@ -246,7 +292,7 @@ WmWidget::WmWidget(QWidget* const parent)
 
     // ------------------------------------------------------------------------
 
-    m_textBox                  = new QWidget(panel);
+    m_textBox                  = new QWidget(panel2);
     m_textBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* textBoxLayout = new QGridLayout(m_textBox);
 
@@ -254,29 +300,29 @@ WmWidget::WmWidget(QWidget* const parent)
     m_authorEdit         = new KLineEdit(m_textBox);
 
     QLabel* licenseLabel = new QLabel(i18n("License:"), m_textBox);
-    m_licenseComboBox    = new SqueezedComboBox(m_textBox);
+    m_licenseComboBox    = new QComboBox(m_textBox);
 
-    m_licenseComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and GFDL"),
+    m_licenseComboBox->addItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and GFDL"),
                                 QString("{{self|cc-by-sa-3.0|GFDL|migration=redundant}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and older"),
+    m_licenseComboBox->addItem(i18n("Own work, multi-license with CC-BY-SA-3.0 and older"),
                                 QString("{{self|cc-by-sa-3.0,2.5,2.0,1.0}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Creative Commons Attribution-Share Alike 3.0"),
+    m_licenseComboBox->addItem(i18n("Creative Commons Attribution-Share Alike 3.0"),
                                 QString("{{self|cc-by-sa-3.0}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Own work, Creative Commons Attribution 3.0"),
+    m_licenseComboBox->addItem(i18n("Own work, Creative Commons Attribution 3.0"),
                                 QString("{{self|cc-by-3.0}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Own work, release into public domain under the CC-Zero license"),
+    m_licenseComboBox->addItem(i18n("Own work, release into public domain under the CC-Zero license"),
                                 QString("{{self|cc-zero}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Author died more than 100 years ago"),
+    m_licenseComboBox->addItem(i18n("Author died more than 100 years ago"),
                                 QString("{{PD-old}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Photo of a two-dimensional work whose author died more than 100 years ago"),
+    m_licenseComboBox->addItem(i18n("Photo of a two-dimensional work whose author died more than 100 years ago"),
                                 QString("{{PD-art}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("First published in the United States before 1923"),
+    m_licenseComboBox->addItem(i18n("First published in the United States before 1923"),
                                 QString("{{PD-US}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Work of a U.S. government agency"),
+    m_licenseComboBox->addItem(i18n("Work of a U.S. government agency"),
                                 QString("{{PD-USGov}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Simple typefaces, individual words or geometric shapes"),
+    m_licenseComboBox->addItem(i18n("Simple typefaces, individual words or geometric shapes"),
                                 QString("{{PD-text}}"));
-    m_licenseComboBox->addSqueezedItem(i18n("Logos with only simple typefaces, individual words or geometric shapes"),
+    m_licenseComboBox->addItem(i18n("Logos with only simple typefaces, individual words or geometric shapes"),
                                 QString("{{PD-textlogo}}"));
 
     textBoxLayout->addWidget(aut,               1, 0, 1, 1);
@@ -290,7 +336,7 @@ WmWidget::WmWidget(QWidget* const parent)
 
     //------------------------------------------------------------------------------------
 
-    m_optionsBox                  = new QWidget(panel);
+    m_optionsBox                  = new QWidget(panel2);
     m_optionsBox->setWhatsThis(i18n("These are options that will be applied to photos before upload."));
     QGridLayout* optionsBoxLayout = new QGridLayout(m_optionsBox);
 
@@ -327,10 +373,13 @@ WmWidget::WmWidget(QWidget* const parent)
     m_settingsExpander->addItem(m_optionsBox, i18n("Options"), QString("options"), true);
     m_settingsExpander->setItemIcon(2, SmallIcon("system-run"));
 
+
+
+
     // ------------------------------------------------------------------------
     QTabWidget* tabWidget;
     tabWidget =  new QTabWidget;
-    tabWidget->addTab(sv, "Upload");
+    tabWidget->addTab(upload, "Upload2");
     tabWidget->addTab(config,"Config");
 
     // ------------------------------------------------------------------------
@@ -510,6 +559,7 @@ QString WmWidget::author() const
 QString WmWidget::license() const
 {
     kDebug() << "WmWidget::license()";
+
     return m_licenseComboBox->itemData(m_licenseComboBox->currentIndex()).toString();
 }
 

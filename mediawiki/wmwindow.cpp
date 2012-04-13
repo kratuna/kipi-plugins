@@ -192,6 +192,7 @@ void WMWindow::slotStartTransfer()
     QList<QMap<QString, QString> > imageDesc;
     QString author  = m_widget->author();
     QString license = m_widget->license();
+
     QString category;
 
     for (int i = 0; i < urls.size(); ++i)
@@ -207,7 +208,7 @@ void WMWindow::slotStartTransfer()
         map["description"] = info.description();
         map["time"]        = info.date().toString(Qt::ISODate);
 
-        for( int i = keywar.size(); i > 0; i--)
+        for( int i = keywar.size()-1; i > 0; i--)
         {
             if(keywar.at(i).contains("wikimedia"))
             category.append(" "+keywar.at(i)+"\n|[[Category:");
