@@ -152,7 +152,7 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
         text.append( "]]");
     }
     
-    text.append("\n|[[Category:").append(info["categories"]);
+
     text.append( "\n|Date=").append( info["time"]);
     text.append( "\n|Permission=");
     text.append( "\n|other_versions=");
@@ -180,9 +180,9 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
         text.append( "\n}}");
     }
 
-    text.append( " == {{int:license}} ==");
-    if(info.contains("licence"))
-        text.append( info["licence"]);
+    text.append( "\n== {{int:license}} ==\n");
+    if(info.contains("license"))
+        text.append( info["license"]);
 
     return text;
 }

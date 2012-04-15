@@ -118,6 +118,19 @@ private Q_SLOTS:
 
 private:
 
+
+
+
+
+    KVBox*                     m_uploadBox;
+    QWidget*                   m_fileBox;
+    KLineEdit*                 m_titleEdit;
+    KLineEdit*                 m_descEdit;
+    KLineEdit*                 m_dateEdit;
+    KLineEdit*                 m_longitudeEdit;
+    KLineEdit*                 m_latitudeEdit;
+    KLineEdit*                 m_categoryEdit;
+
     KVBox*                     m_userBox;
     QWidget*                   m_loginBox;
     QLabel*                    m_loginHeaderLbl;
@@ -141,7 +154,7 @@ private:
     QCheckBox*                 m_resizeChB;
     QSpinBox*                  m_dimensionSpB;
     QSpinBox*                  m_imageQualitySpB;
-    SqueezedComboBox*          m_licenseComboBox;
+    QComboBox*          m_licenseComboBox;
 
     KPProgressWidget*          m_progressBar;
 
