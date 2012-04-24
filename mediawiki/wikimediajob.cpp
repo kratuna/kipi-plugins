@@ -100,11 +100,10 @@ void WikiMediaJob::uploadHandle(KJob* j)
     {
         QMap<QString,QString> info = m_imageDesc.takeFirst();
         Upload* e1      = new Upload( *m_mediawiki, this);
-        /* Normalize the url file name to string */
-        info["url"].replace("%20","\ ");
-        kDebug() << "image path : " << info["url"].remove("file://");
 
-        QFile* file = new QFile(info["url"].remove("file://"),this);
+        kDebug() << "image path : " << info["url"];
+
+        QFile* file = new QFile(info["url"],this);
         file->open(QIODevice::ReadOnly);
         //emit fileUploadProgress(done = 0, total file.size());
 

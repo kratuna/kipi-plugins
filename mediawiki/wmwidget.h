@@ -107,6 +107,7 @@ Q_SIGNALS:
 
     void signalChangeUserRequest();
     void signalLoginRequest(const QString& login, const QString& pass, const QUrl& wiki);
+    void signalApplyUploadSettings();
 
 private Q_SLOTS:
 
@@ -164,6 +165,13 @@ private:
 
     QStringList    m_WikisHistory;
     QStringList     m_UrlsHistory;
+
+    QString         *img_desc;
+    QList<QString>  *img_cat;
+    QString         *img_title;
+    QString         *img_date;
+    QString         *img_longitude;
+    QString         *img_latitude;
 
 
     friend class WmWindow;
