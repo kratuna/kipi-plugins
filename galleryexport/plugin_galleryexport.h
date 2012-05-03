@@ -52,8 +52,8 @@ public:
     Plugin_GalleryExport(QObject* const parent, const QVariantList& args);
     ~Plugin_GalleryExport();
 
-    virtual Category category(KAction* action) const;
-    virtual void setup(QWidget*);
+    virtual Category category(KAction* const action) const;
+    virtual void setup(QWidget* const);
 
 public Q_SLOTS:
 
@@ -61,9 +61,8 @@ public Q_SLOTS:
 
 private:
 
-    KAction* m_action;
-
-    Gallery* mpGallery;
+    class Private;
+    Private* const d;
 };
 
 } // namespace KIPIGalleryExportPlugin

@@ -20,8 +20,6 @@
  *
  * ============================================================ */
 
-#include "kptooldialog.moc"
-
 // KDE includes
 
 #include <kaction.h>
@@ -34,56 +32,58 @@
 
 // Local includes
 
-#include "kpaboutdata.h"
+#include "kptooldialog.h"
+#include "kptooldialog_p.h"
 
 namespace KIPIPlugins
 {
 
-class KPToolDialog::KPToolDialogPriv
-{
-public:
-
-    KPToolDialogPriv()
-    {
-        about = 0;
-    }
-
-    KPAboutData* about;
-};
-
 KPToolDialog::KPToolDialog(QWidget* const parent)
-    : KDialog(parent), d(new KPToolDialogPriv)
+    : KDialog(parent), d(new KPDialogPrivate(this))
 {
     setButtons(Help | Ok);
 }
 
 KPToolDialog::~KPToolDialog()
 {
-    delete d->about;
-    delete d;
 }
 
-void KPToolDialog::setAboutData(KPAboutData* const about)
+void KPToolDialog::setAboutData(KPAboutData* const about, KPushButton* const help)
 {
-    d->about = about;
-
-    disconnect(this, SIGNAL(helpClicked()),
-               this, SLOT(slotHelp()));
-
-    KHelpMenu* helpMenu = new KHelpMenu(this, d->about, false);
-    helpMenu->menu()->removeAction(helpMenu->menu()->actions().first());
-    KAction* handbook   = new KAction(KIcon("help-contents"), i18n("Handbook"), this);
-
-    connect(handbook, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelp()));
-
-    helpMenu->menu()->insertAction(helpMenu->menu()->actions().first(), handbook);
-    button(Help)->setMenu(helpMenu->menu());
+    d->setAboutData(about, help);
 }
 
-void KPToolDialog::slotHelp()
+// -----------------------------------------------------------------------------------
+
+KPWizardDialog::KPWizardDialog(QWidget* const parent)
+    : KAssistantDialog(parent), d(new KPDialogPrivate(this))
 {
-    KToolInvocation::invokeHelp(d->about ? d->about->handbookEntry : QString(), "kipi-plugins");
+}
+
+KPWizardDialog::~KPWizardDialog()
+{
+}
+
+void KPWizardDialog::setAboutData(KPAboutData* const about, KPushButton* const help)
+{
+    d->setAboutData(about, help);
+}
+
+// -----------------------------------------------------------------------------------
+
+KPPageDialog::KPPageDialog(QWidget* const parent)
+    : KPageDialog(parent), d(new KPDialogPrivate(this))
+{
+    setButtons(Help | Ok);
+}
+
+KPPageDialog::~KPPageDialog()
+{
+}
+
+void KPPageDialog::setAboutData(KPAboutData* const about, KPushButton* const help)
+{
+    d->setAboutData(about, help);
 }
 
 } // namespace KIPIPlugins

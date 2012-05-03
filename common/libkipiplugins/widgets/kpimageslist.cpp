@@ -289,13 +289,13 @@ void KPImagesListView::setup(int iconSize)
 
     setColumnCount(8);
     setHeaderLabels(QStringList() << i18n("Thumbnail")
-                    << i18n("File Name")
-                    << i18n("User1")
-                    << i18n("User2")
-                    << i18n("User3")
-                    << i18n("User4")
-                    << i18n("User5")
-                    << i18n("User6"));
+                                  << i18n("File Name")
+                                  << i18n("User1")
+                                  << i18n("User2")
+                                  << i18n("User3")
+                                  << i18n("User4")
+                                  << i18n("User5")
+                                  << i18n("User6"));
     hideColumn(User1);
     hideColumn(User2);
     hideColumn(User3);
@@ -303,15 +303,15 @@ void KPImagesListView::setup(int iconSize)
     hideColumn(User5);
     hideColumn(User6);
 
-    header()->setResizeMode(User1, QHeaderView::ResizeToContents);
-    header()->setResizeMode(User2, QHeaderView::Stretch);
-    header()->setResizeMode(User3, QHeaderView::Stretch);
-    header()->setResizeMode(User4, QHeaderView::Stretch);
-    header()->setResizeMode(User5, QHeaderView::Stretch);
+    header()->setResizeMode(User1, QHeaderView::Interactive);
+    header()->setResizeMode(User2, QHeaderView::Interactive);
+    header()->setResizeMode(User3, QHeaderView::Interactive);
+    header()->setResizeMode(User4, QHeaderView::Interactive);
+    header()->setResizeMode(User5, QHeaderView::Interactive);
     header()->setResizeMode(User6, QHeaderView::Stretch);
 
-    connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-            this, SLOT(slotItemClicked(QTreeWidgetItem*,int)));
+    connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+            this, SLOT(slotItemClicked(QTreeWidgetItem*, int)));
 }
 
 void KPImagesListView::enableDragAndDrop(const bool enable)
@@ -399,7 +399,7 @@ QModelIndex KPImagesListView::indexFromItem(KPImagesListViewItem* item, int colu
   return QTreeWidget::indexFromItem(item, column);
 }
  
-void KPImagesListView::contextMenuEvent(QContextMenuEvent * e)
+void KPImagesListView::contextMenuEvent(QContextMenuEvent* e)
 {
     QTreeWidget::contextMenuEvent(e);
     emit signalContextMenuRequested();
@@ -443,19 +443,17 @@ void KPImagesListView::dropEvent(QDropEvent* e)
 
     if (!urls.isEmpty())
     {
-        emit addedDropedItems(urls);
+        emit signalAddedDropedItems(urls);
     }
 }
 
 Interface* KPImagesListView::iface() const
 {
     KPImagesList* p = dynamic_cast<KPImagesList*>(parent());
-
     if (p)
     {
         return p->iface();
     }
-
     return 0;
 }
 
@@ -572,19 +570,19 @@ KPImagesList::KPImagesList(QWidget* const parent, int iconSize)
 
     // --------------------------------------------------------
 
-    connect(d->listView, SIGNAL(addedDropedItems(KUrl::List)),
+    connect(d->listView, SIGNAL(signalAddedDropedItems(KUrl::List)),
             this, SLOT(slotAddImages(KUrl::List)));
 
     if (d->iface)
     {
-        connect(d->iface, SIGNAL(gotThumbnail(KUrl,QPixmap)),
-                this, SLOT(slotThumbnail(KUrl,QPixmap)));
+        connect(d->iface, SIGNAL(gotThumbnail(KUrl, QPixmap)),
+                this, SLOT(slotThumbnail(KUrl, QPixmap)));
     }
 
     d->loadRawThumb = new KPRawThumbThread(this);
 
-    connect(d->loadRawThumb, SIGNAL(signalRawThumb(KUrl,QImage)),
-            this, SLOT(slotRawThumb(KUrl,QImage)));
+    connect(d->loadRawThumb, SIGNAL(signalRawThumb(KUrl, QImage)),
+            this, SLOT(slotRawThumb(KUrl, QImage)));
 
     connect(d->listView, SIGNAL(signalItemClicked(QTreeWidgetItem*)),
             this, SIGNAL(signalItemClicked(QTreeWidgetItem*)));
@@ -814,7 +812,7 @@ void KPImagesList::slotAddImages(const KUrl::List& list)
         if (d->allowDuplicate || !found)
         {
             // if RAW files are not allowed, skip the image
-            if (!d->allowRAW && isRAWFile(imageUrl.path()))
+            if (!d->allowRAW && KPMetadata::isRawFile(imageUrl))
             {
                 raw = true;
                 continue;
@@ -1097,7 +1095,7 @@ void KPImagesList::slotProgressTimerDone()
 {
     if (!d->processItems.isEmpty())
     {
-        foreach(KUrl url, d->processItems)
+        foreach(const KUrl& url, d->processItems)
         {
             KPImagesListViewItem* item = listView()->findItem(url);
             if (item) item->setProgressAnimation(d->progressPix.frameAt(d->progressCount));
@@ -1144,7 +1142,7 @@ void KPImagesList::processed(const KUrl& url, bool success)
 
 void KPImagesList::cancelProcess()
 {
-    foreach(KUrl url, d->processItems)
+    foreach(const KUrl& url, d->processItems)
     {
         processed(url, false);
     }
@@ -1175,20 +1173,6 @@ KPImagesListView* KPImagesList::listView() const
 Interface* KPImagesList::iface() const
 {
     return d->iface;
-}
-
-bool KPImagesList::isRAWFile(const QString& filePath) const
-{
-    QString rawFilesExt(KDcrawIface::KDcraw::rawFiles());
-
-    QFileInfo fileInfo(filePath);
-
-    if (rawFilesExt.toUpper().contains(fileInfo.suffix().toUpper()))
-    {
-        return true;
-    }
-
-    return false;
 }
 
 void KPImagesList::slotImageListChanged()
@@ -1233,8 +1217,8 @@ void KPImagesList::updateThumbnail(const KUrl& url)
         KIO::PreviewJob* job = KIO::filePreview(KUrl::List() << url.toLocalFile(), DEFAULTSIZE);
 #endif
 
-        connect(job, SIGNAL(gotPreview(KFileItem,QPixmap)),
-                this, SLOT(slotKDEPreview(KFileItem,QPixmap)));
+        connect(job, SIGNAL(gotPreview(KFileItem, QPixmap)),
+                this, SLOT(slotKDEPreview(KFileItem, QPixmap)));
 
         connect(job, SIGNAL(failed(KFileItem)),
                 this, SLOT(slotKDEPreviewFailed(KFileItem)));
