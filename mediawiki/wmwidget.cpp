@@ -379,7 +379,7 @@ WmWidget::WmWidget(QWidget* const parent)
     // ------------------------------------------------------------------------
     QTabWidget* tabWidget;
     tabWidget =  new QTabWidget;
-    tabWidget->addTab(upload, "Upload2");
+    tabWidget->addTab(upload, "Upload");
     tabWidget->addTab(config,"Config");
 
     // ------------------------------------------------------------------------
@@ -396,8 +396,7 @@ WmWidget::WmWidget(QWidget* const parent)
     mainLayout->setMargin(0);
 
     updateLabels();  // use empty labels until login
-
-    // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
     connect(m_resizeChB, SIGNAL(clicked()),
             this, SLOT(slotResizeChecked()));
@@ -437,11 +436,11 @@ void WmWidget::readSettings(KConfigGroup& group)
     m_WikisHistory = group.readEntry("Wikis history", QStringList());
     m_UrlsHistory = group.readEntry("Urls history", QStringList());
 
-    /*if(m_UrlsHistory.size() != 0 && m_WikisHistory.size() != 0){
+    if(m_UrlsHistory.size() != 0 && m_WikisHistory.size() != 0){
         for(int i = 0 ; i < m_UrlsHistory.size() ; i++){
             m_wikiSelect->addItem(m_WikisHistory.at(i),m_UrlsHistory.at(i));
         }
-    }*/
+    }
 }
 
 void WmWidget::saveSettings(KConfigGroup& group)
@@ -545,11 +544,35 @@ void WmWidget::slotAddWikiClicked()
 
     m_wikiSelect->addItem(m_newWikiNameEdit->userText(),m_newWikiUrlEdit->userText());
     m_wikiSelect->setCurrentIndex(m_wikiSelect->count()-1);
+
     this->slotNewWikiClicked();
 
 
 }
+/*TODO
+void WmWidget::slotApplyInfoClicked()
+{
 
+    if(!m_descEdit->text()){
+        img_desc=new QString(m_descEdit->text())
+    }
+    if(!m_titleEdit->text()){
+        img_title=new QString(m_titleEdit->text())
+    }
+    if(!m_dateEdit->text()){
+        img_date=new QString(m_dateEdit->text());
+    }
+    if(!m_longitudeEdit->text()){
+        img_longitude=new QString(m_longitudeEdit->text());
+    }
+    if(!m_latitudeEdit->text()){
+        img_latitude=new QString(m_latitudeEdit->text());
+    }
+
+
+
+}
+*/
 QString WmWidget::author() const
 {
     kDebug() << "WmWidget::author()";

@@ -189,7 +189,9 @@ void WMWindow::slotStartTransfer()
         QStringList keywar = info.keywords();
         QMap<QString, QString> map;
 
-        map["url"]         = urls.at(i).url();
+
+
+        map["url"]         = urls.at(i).path();
         map["license"]     = license;
         map["author"]      = author;
         map["description"] = info.description();
