@@ -181,9 +181,10 @@ void WMWindow::slotStartTransfer()
     QString license = m_widget->license();
 
     QString category;
-
+    QImage image;
     for (int i = 0; i < urls.size(); ++i)
     {
+
         KPImageInfo info(urls.at(i));
 
         QStringList keywar = info.keywords();
