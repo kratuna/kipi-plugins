@@ -100,8 +100,11 @@ public:
     QString author() const;
     QString license() const;
 
+    QMap <QString,QMap <QString,QString> > allImagesDesc() const;
+
     void readSettings(KConfigGroup& group);
     void saveSettings(KConfigGroup& group);
+    void prepareImagesDesc();
 
 Q_SIGNALS:
 
@@ -116,6 +119,13 @@ private Q_SLOTS:
     void slotLoginClicked();
     void slotNewWikiClicked();
     void slotAddWikiClicked();
+    void slotApplyDescriptionClicked(const QString imageFile);
+    void slotApplyTitleClicked(const QString imageFile);
+    void slotApplyDateClicked(const QString imageFile);
+    void slotApplyLongitudeClicked(const QString imageFile);
+    void slotApplyLatitudeClicked(const QString imageFile);
+    void slotApplyCategoryClicked(const QString imageFile);
+
 
 private:
 
@@ -163,15 +173,11 @@ private:
     KPImagesList*              m_imgList;
     UploadWidget*              m_uploadWidget;
 
-    QStringList    m_WikisHistory;
+    QStringList     m_WikisHistory;
     QStringList     m_UrlsHistory;
 
-    QString         *img_desc;
-    QList<QString>  *img_cat;
-    QString         *img_title;
-    QString         *img_date;
-    QString         *img_longitude;
-    QString         *img_latitude;
+    QMap <QString,QMap <QString,QString> > m_imagesDescInfo;
+
 
 
     friend class WmWindow;

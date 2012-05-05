@@ -203,7 +203,6 @@ void WMWindow::slotStartTransfer()
         QMap<QString, QString> map;
 
 
-
         map["url"]         = urls.at(i).path();
         map["license"]     = license;
         map["author"]      = author;

@@ -66,6 +66,7 @@
 
 #include "kpimageslist.h"
 #include "kpprogresswidget.h"
+#include "kpimageinfo.h"
 #include "wmwidget.h"
 
 namespace KIPIWikiMediaPlugin
@@ -85,7 +86,6 @@ WmWidget::WmWidget(QWidget* const parent)
     m_imgList->setAllowRAW(true);
     m_imgList->loadImagesFromCurrentSelection();
     m_imgList->listView()->setWhatsThis(i18n("This is the list of images to upload to your Wikimedia account."));
-
      // *****************************Tab Upload****************************************
 
     QScrollArea* upload = new QScrollArea(this);
@@ -549,30 +549,84 @@ void WmWidget::slotAddWikiClicked()
 
 
 }
-/*TODO
-void WmWidget::slotApplyInfoClicked()
-{
+void WmWidget::prepareImagesDesc(){
 
-    if(!m_descEdit->text()){
-        img_desc=new QString(m_descEdit->text())
-    }
-    if(!m_titleEdit->text()){
-        img_title=new QString(m_titleEdit->text())
-    }
-    if(!m_dateEdit->text()){
-        img_date=new QString(m_dateEdit->text());
-    }
-    if(!m_longitudeEdit->text()){
-        img_longitude=new QString(m_longitudeEdit->text());
-    }
-    if(!m_latitudeEdit->text()){
-        img_latitude=new QString(m_latitudeEdit->text());
+
+    KUrl::List urls = m_imgList->imageUrls();
+
+
+    for (int i = 0; i < urls.size(); ++i)
+    {
+        KPImageInfo info(urls.at(i));
+
+        QStringList keywar = info.keywords();
+
+        QMap<QString, QString> imageMetaData;
+
+
+        imageMetaData["url"]         = urls.at(i).path();
+        imageMetaData["license"]     = this->license();
+        imageMetaData["author"]      = this->author();
+        imageMetaData["description"] = info.description();
+        imageMetaData["time"]        = info.date().toString(Qt::ISODate);
+
+
+        if(info.hasGeolocationInfo())
+        {
+            imageMetaData["latitude"]  = QString::number(info.latitude());
+            imageMetaData["longitude"] = QString::number(info.longitude());
+            imageMetaData["altitude"]  = QString::number(info.altitude());
+        }
+
+        m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
     }
 
 
 
 }
-*/
+/* Slot used to apply the descripton settings for the selected image */
+void WmWidget::slotApplyDescriptionClicked(const QString imageFile)
+{
+    m_imagesDescInfo.take(imageFile)["description"] = m_descEdit->text();
+
+}
+
+void WmWidget::slotApplyTitleClicked(const QString imageFile)
+{
+    m_imagesDescInfo.take(imageFile)["title"] = m_titleEdit->text();
+
+}
+
+void WmWidget::slotApplyDateClicked(const QString imageFile)
+{
+    m_imagesDescInfo.take(imageFile)["time"]= m_dateEdit->text();
+}
+
+void WmWidget::slotApplyLongitudeClicked(const QString imageFile)
+{
+    m_imagesDescInfo.take(imageFile)["longitude"]= m_longitudeEdit->text();
+}
+
+void WmWidget::slotApplyLatitudeClicked(const QString imageFile)
+{
+m_imagesDescInfo.take(imageFile)["latitude"]= m_latitudeEdit->text();
+
+}
+/* Works only with one category*/
+/*TODO split category with "," or ";" */
+void WmWidget::slotApplyCategoryClicked(const QString imageFile)
+{
+    m_imagesDescInfo.take(imageFile)["category"]= m_categoryEdit->text();
+
+}
+
+
+
+QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc() const
+{
+    return m_imagesDescInfo;
+}
+
 QString WmWidget::author() const
 {
     kDebug() << "WmWidget::author()";
