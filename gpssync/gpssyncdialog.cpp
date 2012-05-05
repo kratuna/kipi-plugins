@@ -7,7 +7,7 @@
  * @date   2006-05-16
  * @brief  A plugin to synchronize pictures with a GPS device.
  *
- * @author Copyright (C) 2006-2011 by Gilles Caulier
+ * @author Copyright (C) 2006-2012 by Gilles Caulier
  *         <a href="mailto:caulier dot gilles at gmail dot com">caulier dot gilles at gmail dot com</a>
  * @author Copyright (C) 2010, 2011 by Michael G. Hansen
  *         <a href="mailto:mike at mghansen dot de">mike at mghansen dot de</a>
@@ -115,7 +115,7 @@ struct SaveChangedImagesHelper
 {
 public:
     SaveChangedImagesHelper(KipiImageModel* const model)
-    : imageModel(model)
+        : imageModel(model)
     {
     }
 
@@ -132,11 +132,13 @@ public:
     }
 };
 
+// ---------------------------------------------------------------------------------
+
 struct LoadFileMetadataHelper
 {
 public:
     LoadFileMetadataHelper(KipiImageModel* const model)
-    : imageModel(model)
+        : imageModel(model)
     {
     }
 
@@ -173,8 +175,7 @@ public:
     }
 
     // General things
-    KIPI::Interface                         *interface;
-    KIPIPlugins::KPAboutData                *about;
+    Interface                               *interface;
     KipiImageModel                          *imageModel;
     QItemSelectionModel                     *selectionModel;
     bool                                     uiEnabled;
@@ -217,13 +218,13 @@ public:
     // map: UI
     MapLayout                                mapLayout;
     QSplitter                               *mapSplitter;
-    KGeoMap::KGeoMapWidget                  *mapWidget;
-    KGeoMap::KGeoMapWidget                  *mapWidget2;
+    KGeoMapWidget                           *mapWidget;
+    KGeoMapWidget                           *mapWidget2;
 
     // map: helpers
     MapDragDropHandler                      *mapDragDropHandler;
     GPSSyncKGeoMapModelHelper               *mapModelHelper;
-    KGeoMap::ItemMarkerTiler                *kgeomapMarkerModel;
+    ItemMarkerTiler                         *kgeomapMarkerModel;
 
     // map: actions
     QAction                                 *sortActionOldestFirst;
@@ -231,8 +232,8 @@ public:
     QMenu                                   *sortMenu;
 };
 
-GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
-             : KDialog(parent), d(new GPSSyncDialogPriv)
+GPSSyncDialog::GPSSyncDialog(Interface* const interface, QWidget* const parent)
+    : KPToolDialog(parent), d(new GPSSyncDialogPriv)
 {
     d->interface = interface;
 
@@ -261,7 +262,7 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
     d->mapModelHelper->addUngroupedModelHelper(d->bookmarkOwner->bookmarkModelHelper());
     d->mapModelHelper->addUngroupedModelHelper(d->searchWidget->getModelHelper());
     d->mapDragDropHandler = new MapDragDropHandler(d->imageModel, d->mapModelHelper);
-    d->kgeomapMarkerModel = new KGeoMap::ItemMarkerTiler(d->mapModelHelper, this);
+    d->kgeomapMarkerModel = new ItemMarkerTiler(d->mapModelHelper, this);
 
     d->actionBookmarkVisibility = new KAction(this);
     d->actionBookmarkVisibility->setIcon(KIcon("user-trash"));
@@ -292,10 +293,10 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
             this, SLOT(slotProgressCancelButtonClicked()));
 
     d->buttonBox = new KDialogButtonBox(hboxBottom);
-    QPushButton* helpButton = d->buttonBox->addButton(KStandardGuiItem::help(), QDialogButtonBox::HelpRole);
-    d->buttonBox->addButton(KStandardGuiItem::configure(), QDialogButtonBox::ActionRole, this, SLOT(slotConfigureClicked()));
-    d->buttonBox->addButton(KStandardGuiItem::apply(),     QDialogButtonBox::AcceptRole, this, SLOT(slotApplyClicked()));
-    d->buttonBox->addButton(KStandardGuiItem::close(),     QDialogButtonBox::RejectRole, this, SLOT(close()));
+    KPushButton* help = d->buttonBox->addButton(KStandardGuiItem::help(), QDialogButtonBox::HelpRole);
+    d->buttonBox->addButton(KStandardGuiItem::configure(),                QDialogButtonBox::ActionRole, this, SLOT(slotConfigureClicked()));
+    d->buttonBox->addButton(KStandardGuiItem::apply(),                    QDialogButtonBox::AcceptRole, this, SLOT(slotApplyClicked()));
+    d->buttonBox->addButton(KStandardGuiItem::close(),                    QDialogButtonBox::RejectRole, this, SLOT(close()));
 
     // TODO: the code below does not seem to have any effect, slotApplyClicked is still triggered
     //       when 'Enter' is pressed...
@@ -307,7 +308,7 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
 //         if (d->buttonBox->buttonRole(testButton)==QDialogButtonBox::AcceptRole)
         {
             QPushButton* const pushButton = dynamic_cast<QPushButton*>(testButton);
-            kDebug()<<pushButton<<pushButton->isDefault();
+            kDebug() << pushButton << pushButton->isDefault();
             if (pushButton)
             {
                 pushButton->setDefault(false);
@@ -339,13 +340,13 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
             this, SLOT(slotBookmarkVisibilityToggled()));
 
     QWidget* mapVBox = 0;
-    d->mapWidget   = makeMapWidget(&mapVBox);
+    d->mapWidget     = makeMapWidget(&mapVBox);
     d->searchWidget->setPrimaryMapWidget(d->mapWidget);
-    d->mapSplitter = new QSplitter(this);
+    d->mapSplitter   = new QSplitter(this);
     d->mapSplitter->addWidget(mapVBox);
     d->VSplitter->addWidget(d->mapSplitter);
 
-    d->treeView    = new KipiImageList(d->interface, this);
+    d->treeView      = new KipiImageList(d->interface, this);
     d->treeView->setModelAndSelectionModel(d->imageModel, d->selectionModel);
     d->treeView->setDragDropHandler(new GPSImageListDragDropHandler(this));
     d->treeView->setDragEnabled(true);
@@ -397,31 +398,26 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
     // ---------------------------------------------------------------
     // About data and help button.
 
-    d->about = new KIPIPlugins::KPAboutData(ki18n("GPS Sync"),
-                   0,
-                   KAboutData::License_GPL,
-                   ki18n("A Plugin to synchronize pictures' metadata with a GPS device"),
-                   ki18n("(c) 2006-2011, Gilles Caulier"));
+    KPAboutData* about = new KPAboutData(ki18n("GPS Sync"),
+                             0,
+                             KAboutData::License_GPL,
+                             ki18n("A Plugin to synchronize pictures' metadata with a GPS device"),
+                             ki18n("(c) 2006-2012, Gilles Caulier"));
 
-    d->about->addAuthor(ki18n("Michael G. Hansen"),
-                        ki18n("Developer and maintainer"),
-                              "mike at mghansen dot de");
+    about->addAuthor(ki18n("Michael G. Hansen"),
+                     ki18n("Developer and maintainer"),
+                           "mike at mghansen dot de");
 
-    d->about->addAuthor(ki18n("Gabriel Voicu"),
-                        ki18n("Developer"),
-                              "ping dot gabi at gmail dot com");
+    about->addAuthor(ki18n("Gabriel Voicu"),
+                     ki18n("Developer"),
+                           "ping dot gabi at gmail dot com");
 
-    d->about->addAuthor(ki18n("Gilles Caulier"),
-                        ki18n("Developer"),
-                              "caulier dot gilles at gmail dot com");
+    about->addAuthor(ki18n("Gilles Caulier"),
+                     ki18n("Developer"),
+                           "caulier dot gilles at gmail dot com");
 
-    KHelpMenu* helpMenu = new KHelpMenu(this, d->about, false);
-    helpMenu->menu()->removeAction(helpMenu->menu()->actions().first());
-    QAction* handbook   = new QAction(i18n("Handbook"), this);
-    connect(handbook, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelp()));
-    helpMenu->menu()->insertAction(helpMenu->menu()->actions().first(), handbook);
-    helpButton->setMenu(helpMenu->menu());
+    about->handbookEntry = QString("gpssync");
+    setAboutData(about, help);
 
     // ---------------------------------------------------------------
 
@@ -504,13 +500,7 @@ GPSSyncDialog::GPSSyncDialog(KIPI::Interface* interface, QWidget* parent)
 
 GPSSyncDialog::~GPSSyncDialog()
 {
-    delete d->about;
     delete d;
-}
-
-void GPSSyncDialog::slotHelp()
-{
-    KToolInvocation::invokeHelp("gpssync", "kipi-plugins");
 }
 
 bool GPSSyncDialog::eventFilter(QObject* const o, QEvent* const e)
@@ -819,7 +809,7 @@ void GPSSyncDialog::slotImageActivated(const QModelIndex& index)
     if (!item)
         return;
 
-    const KGeoMap::GeoCoordinates imageCoordinates = item->coordinates();
+    const GeoCoordinates imageCoordinates = item->coordinates();
     if (imageCoordinates.hasCoordinates())
     {
         d->mapWidget->setCenter(imageCoordinates);
@@ -832,6 +822,7 @@ void GPSSyncDialog::slotSetUIEnabled(const bool enabledState, QObject* const can
     {
         // hide the progress bar
         d->progressBar->setVisible(false);
+        d->progressBar->progressCompleted();
         d->progressCancelButton->setVisible(false);
     }
 
@@ -867,12 +858,12 @@ public:
 
     KipiImageModel*              model;
     QItemSelectionModel*         selectionModel;
-    QList<KGeoMap::ModelHelper*> ungroupedModelHelpers;
+    QList<ModelHelper*> ungroupedModelHelpers;
 };
 
 GPSSyncKGeoMapModelHelper::GPSSyncKGeoMapModelHelper(KipiImageModel* const model, 
                                                      QItemSelectionModel* const selectionModel, QObject* const parent)
-    : KGeoMap::ModelHelper(parent), d(new GPSSyncKGeoMapModelHelperPrivate())
+    : ModelHelper(parent), d(new GPSSyncKGeoMapModelHelperPrivate())
 {
     d->model          = model;
     d->selectionModel = selectionModel;
@@ -894,7 +885,7 @@ QItemSelectionModel* GPSSyncKGeoMapModelHelper::selectionModel() const
     return d->selectionModel;
 }
 
-bool GPSSyncKGeoMapModelHelper::itemCoordinates(const QModelIndex& index, KGeoMap::GeoCoordinates* const coordinates) const
+bool GPSSyncKGeoMapModelHelper::itemCoordinates(const QModelIndex& index, GeoCoordinates* const coordinates) const
 {
     KipiImageItem* const item = d->model->itemFromIndex(index);
     if (!item)
@@ -959,7 +950,7 @@ void GPSSyncKGeoMapModelHelper::slotThumbnailFromModel(const QPersistentModelInd
 }
 
 void GPSSyncKGeoMapModelHelper::onIndicesMoved(const QList<QPersistentModelIndex>& movedMarkers, 
-                                               const KGeoMap::GeoCoordinates& targetCoordinates, 
+                                               const GeoCoordinates& targetCoordinates,
                                                const QPersistentModelIndex& targetSnapIndex)
 {
     if (targetSnapIndex.isValid())
@@ -967,7 +958,7 @@ void GPSSyncKGeoMapModelHelper::onIndicesMoved(const QList<QPersistentModelIndex
         const QAbstractItemModel* const targetModel = targetSnapIndex.model();
         for (int i=0; i<d->ungroupedModelHelpers.count(); ++i)
         {
-            KGeoMap::ModelHelper* const ungroupedHelper = d->ungroupedModelHelpers.at(i);
+            ModelHelper* const ungroupedHelper = d->ungroupedModelHelpers.at(i);
             if (ungroupedHelper->model()==targetModel)
             {
                 QList<QModelIndex> iMovedMarkers;
@@ -1139,7 +1130,7 @@ void GPSSyncDialog::slotBookmarkVisibilityToggled()
     d->bookmarkOwner->bookmarkModelHelper()->setVisible(d->actionBookmarkVisibility->isChecked());
 }
 
-void GPSSyncKGeoMapModelHelper::addUngroupedModelHelper(KGeoMap::ModelHelper* const newModelHelper)
+void GPSSyncKGeoMapModelHelper::addUngroupedModelHelper(ModelHelper* const newModelHelper)
 {
     d->ungroupedModelHelpers << newModelHelper;
 }
@@ -1159,15 +1150,14 @@ void GPSSyncDialog::slotSetupChanged()
     adjustMapLayout(true);
 }
 
-KGeoMap::KGeoMapWidget* GPSSyncDialog::makeMapWidget(QWidget** const pvbox)
+KGeoMapWidget* GPSSyncDialog::makeMapWidget(QWidget** const pvbox)
 {
-    QWidget* const dummyWidget = new QWidget(this);
-    QVBoxLayout* const vbox    = new QVBoxLayout(dummyWidget);
-
-    KGeoMap::KGeoMapWidget* const mapWidget = new KGeoMap::KGeoMapWidget(dummyWidget);
-    mapWidget->setAvailableMouseModes(KGeoMap::MouseModePan|KGeoMap::MouseModeZoomIntoGroup|KGeoMap::MouseModeSelectThumbnail);
-    mapWidget->setVisibleMouseModes(KGeoMap::MouseModePan|KGeoMap::MouseModeZoomIntoGroup|KGeoMap::MouseModeSelectThumbnail);
-    mapWidget->setMouseMode(KGeoMap::MouseModeSelectThumbnail);
+    QWidget* const dummyWidget     = new QWidget(this);
+    QVBoxLayout* const vbox        = new QVBoxLayout(dummyWidget);
+    KGeoMapWidget* const mapWidget = new KGeoMapWidget(dummyWidget);
+    mapWidget->setAvailableMouseModes(MouseModePan|MouseModeZoomIntoGroup|MouseModeSelectThumbnail);
+    mapWidget->setVisibleMouseModes(MouseModePan|MouseModeZoomIntoGroup|MouseModeSelectThumbnail);
+    mapWidget->setMouseMode(MouseModeSelectThumbnail);
     mapWidget->setGroupedModel(d->kgeomapMarkerModel);
     mapWidget->setDragDropHandler(d->mapDragDropHandler);
     mapWidget->addUngroupedModel(d->bookmarkOwner->bookmarkModelHelper());
@@ -1226,7 +1216,7 @@ void GPSSyncDialog::adjustMapLayout(const bool syncSettings)
     }
 }
 
-KGeoMap::ModelHelper::Flags GPSSyncKGeoMapModelHelper::modelFlags() const
+ModelHelper::Flags GPSSyncKGeoMapModelHelper::modelFlags() const
 {
     return FlagMovable;
 }

@@ -24,13 +24,6 @@
 #ifndef CLOCKPHOTODIALOG_H
 #define CLOCKPHOTODIALOG_H
 
-// Qt includes
-
-#include <QDateTime>
-#include <QScrollArea>
-#include <QScrollBar>
-#include <QLabel>
-
 // KDE includes
 
 #include <kdialog.h>
@@ -38,6 +31,8 @@
 
 namespace KIPITimeAdjustPlugin
 {
+
+class DeltaTime;
 
 class ClockPhotoDialog : public KDialog
 {
@@ -48,17 +43,13 @@ public:
     ClockPhotoDialog(QWidget* const parent);
     ~ClockPhotoDialog();
 
-    /* The public variables that hold the time difference. */
-    bool deltaNegative;
-    int  deltaDays;
-    int  deltaHours;
-    int  deltaMinutes;
-    int  deltaSeconds;
-
-    /* Try to load the photo specified by the KUrl, and set the datetime widget
-     * to the photo time. Return true on succes, or false if eithe the photo
-     * can't be read or the datetime information can't be read. */
+    /** Try to load the photo specified by the KUrl, and set the datetime widget
+     *  to the photo time. Return true on succes, or false if eithe the photo
+     *  can't be read or the datetime information can't be read.
+     */
     bool setImage(const KUrl&);
+
+    DeltaTime deltaValues() const;
 
 private Q_SLOTS:
 
@@ -68,7 +59,8 @@ private Q_SLOTS:
 
 private:
 
-    void saveSize();
+    void loadSettings();
+    void saveSettings();
 
 private:
 

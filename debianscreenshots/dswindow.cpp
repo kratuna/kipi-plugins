@@ -31,12 +31,10 @@
 // KDE includes
 
 #include <kmenu.h>
-#include <khelpmenu.h>
 #include <klineedit.h>
 #include <kcombobox.h>
 #include <kpushbutton.h>
 #include <kmessagebox.h>
-#include <ktoolinvocation.h>
 #include <kdebug.h>
 
 // LibKDcraw includes
@@ -47,6 +45,7 @@
 
 #include "kpimageslist.h"
 #include "kpaboutdata.h"
+#include "kpmetadata.h"
 #include "kpprogresswidget.h"
 
 // Local includes
@@ -60,8 +59,8 @@ namespace KIPIDebianScreenshotsPlugin
 static int maxWidth  = 800;
 static int maxHeight = 600;
 
-DsWindow::DsWindow(KIPI::Interface* const interface, const QString& tmpFolder, QWidget* const /*parent*/)
-    : KDialog(0),
+DsWindow::DsWindow(Interface* const interface, const QString& tmpFolder, QWidget* const /*parent*/)
+    : KPToolDialog(0),
       m_uploadEnabled(false),
       m_imagesCount(0),
       m_imagesTotal(0),
@@ -106,25 +105,19 @@ DsWindow::DsWindow(KIPI::Interface* const interface, const QString& tmpFolder, Q
 
     // ------------------------------------------------------------------------
 
-    m_about = new KIPIPlugins::KPAboutData(ki18n("Debian Screenshots Export"), 0,
-                      KAboutData::License_GPL,
-                      ki18n("A Kipi plugin to export an image collection "
-                            "to the Debian Screenshots web site."),
-                      ki18n("(c) 2010, Pau Garcia i Quiles\n"));
+    KPAboutData* about = new KPAboutData(ki18n("Debian Screenshots Export"), 0,
+                             KAboutData::License_GPL,
+                             ki18n("A Kipi plugin to export an image collection "
+                                   "to the Debian Screenshots web site."),
+                              ki18n("(c) 2010, Pau Garcia i Quiles\n"));
 
-    m_about->addAuthor(ki18n("Pau Garcia i Quiles"), ki18n("Author and maintainer"),
-                       "pgquiles at elpauer dot org");
+    about->addAuthor(ki18n("Pau Garcia i Quiles"), ki18n("Author and maintainer"),
+                     "pgquiles at elpauer dot org");
 
-    disconnect(this, SIGNAL(helpClicked()),
-               this, SLOT(slotHelp()) );
+    about->handbookEntry = QString("debianscreenshots");
+    setAboutData(about);
 
-    KHelpMenu* helpMenu = new KHelpMenu(this, m_about, false);
-    helpMenu->menu()->removeAction(helpMenu->menu()->actions().first());
-    QAction *handbook   = new QAction(i18n("Handbook"), this);
-    connect(handbook, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelp()));
-    helpMenu->menu()->insertAction(helpMenu->menu()->actions().first(), handbook);
-    button(Help)->setMenu(helpMenu->menu());
+    // ------------------------------------------------------------------------
 
     connect(m_talker, SIGNAL(signalAddScreenshotDone(int,QString)),
             this, SLOT(slotAddScreenshotDone(int,QString)));
@@ -132,12 +125,6 @@ DsWindow::DsWindow(KIPI::Interface* const interface, const QString& tmpFolder, Q
 
 DsWindow::~DsWindow()
 {
-    delete m_about;
-}
-
-void DsWindow::slotHelp()
-{
-    KToolInvocation::invokeHelp("debianscreenshots", "kipi-plugins");
 }
 
 void DsWindow::slotStopAndCloseProgressBar()
@@ -287,9 +274,7 @@ void DsWindow::uploadNextPhoto()
     }
 
     // check if we have to RAW file -> use preview image then
-    QString rawFilesExt(KDcrawIface::KDcraw::rawFiles());
-    QFileInfo fileInfo(imgPath);
-    if( rawFilesExt.toUpper().contains(fileInfo.suffix().toUpper()) )
+    if( KPMetadata::isRawFile(imgPath) )
     {
         massageRequired = DsWindow::ImageIsRaw;
     }

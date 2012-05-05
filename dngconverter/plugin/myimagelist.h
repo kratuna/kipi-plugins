@@ -42,7 +42,8 @@ public:
     enum FieldType
     {
         TARGETFILENAME = KPImagesListView::User1,
-        IDENTIFICATION = KPImagesListView::User2
+        IDENTIFICATION = KPImagesListView::User2,
+        STATUS         = KPImagesListView::User3
     };
 
 public:
@@ -57,6 +58,10 @@ public Q_SLOTS:
 protected Q_SLOTS:
 
     virtual void slotRemoveItems();
+
+private:
+
+    bool isValidRAWFile(const KUrl& url) const;
 };
 
 // -------------------------------------------------------------------------
@@ -75,12 +80,15 @@ public:
     void setIdentity(const QString& str);
     QString identity() const;
 
+    void setStatus(const QString& str);
+
     QString destPath() const;
 
 private:
 
     QString m_destFileName;
     QString m_identity;
+    QString m_status;
 };
 
 } // namespace KIPIDNGConverterPlugin

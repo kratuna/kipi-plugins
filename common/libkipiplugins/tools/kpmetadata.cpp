@@ -38,10 +38,16 @@
 #include "kpmetasettings.h"
 #include "kphostsettings.h"
 
+// LibKDcraw includes
+
+#include <libkdcraw/kdcraw.h>
+
 // LibKipi includes
 
 #include <libkipi/interface.h>
 #include <libkipi/pluginloader.h>
+
+using namespace KDcrawIface;
 
 namespace KIPIPlugins
 {
@@ -143,15 +149,24 @@ bool KPMetadata::hasSidecar(const QString& path)
 
 #endif // KEXIV2_VERSION < 0x020300
 
+// -- Static Methods -------------------------------------------------------------------------
+
 bool KPMetadata::moveSidecar(const KUrl& src, const KUrl& dst)
 {
     if (hasSidecar(src.toLocalFile()))
     {
         if (KDE_rename(QFile::encodeName(sidecarUrl(src).toLocalFile()), 
-                       QFile::encodeName(sidecarUrl(dst).toLocalFile())) == 0)
-            return true;
+                       QFile::encodeName(sidecarUrl(dst).toLocalFile())) != 0)
+            return false;
     }
-    return false;
+    return true;
+}
+
+bool KPMetadata::isRawFile(const KUrl& url)
+{
+    QString rawFilesExt(KDcraw::rawFiles());
+    QFileInfo fileInfo(url.toLocalFile());
+    return (rawFilesExt.toUpper().contains(fileInfo.suffix().toUpper()));
 }
 
 }  // namespace KIPIPlugins

@@ -26,6 +26,8 @@
 // KDE includes
 
 #include <kdialog.h>
+#include <kpagedialog.h>
+#include <kassistantdialog.h>
 
 // Local includes
 
@@ -35,27 +37,52 @@ namespace KIPIPlugins
 {
 
 class KPAboutData;
+class KPDialogPrivate;
 
 class KIPIPLUGINS_EXPORT KPToolDialog : public KDialog
 {
-
-Q_OBJECT
-
 public:
 
     KPToolDialog(QWidget* const parent=0);
     ~KPToolDialog();
 
-    void setAboutData(KPAboutData* const about);
-
-private Q_SLOTS:
-
-    void slotHelp();
+    void setAboutData(KPAboutData* const about, KPushButton* const help=0);
 
 private:
 
-    class KPToolDialogPriv;
-    KPToolDialogPriv* const d;
+    KPDialogPrivate* const d;
+};
+
+// -----------------------------------------------------------------------------------
+
+class KIPIPLUGINS_EXPORT KPWizardDialog : public KAssistantDialog
+{
+public:
+
+    KPWizardDialog(QWidget* const parent=0);
+    ~KPWizardDialog();
+
+    void setAboutData(KPAboutData* const about, KPushButton* const help=0);
+
+private:
+
+    KPDialogPrivate* const d;
+};
+
+// -----------------------------------------------------------------------------------
+
+class KIPIPLUGINS_EXPORT KPPageDialog : public KPageDialog
+{
+public:
+
+    KPPageDialog(QWidget* const parent=0);
+    ~KPPageDialog();
+
+    void setAboutData(KPAboutData* const about, KPushButton* const help=0);
+
+private:
+
+    KPDialogPrivate* const d;
 };
 
 } // namespace KIPIPlugins

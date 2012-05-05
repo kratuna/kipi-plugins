@@ -79,6 +79,7 @@ extern "C"
 #include "imagelistitem.h"
 #include "ipodlistitem.h"
 #include "kpimageinfo.h"
+#include "kpimagedialog.h"
 #include "kpmetadata.h"
 
 namespace KIPIIpodExportPlugin
@@ -92,17 +93,17 @@ UploadDialog::UploadDialog
     Interface* const interface,
 #endif
     const QString& caption, QWidget* const /*parent*/ )
-    : KDialog(0)
-    , m_transferring( false )
+    : KPToolDialog(0)
+      , m_transferring( false )
 #if KIPI_PLUGIN
-    , m_interface( interface )
+      , m_interface( interface )
 #endif
-    , m_itdb( 0 )
-    , m_ipodInfo( 0 )
-    , m_ipodHeader( 0 )
-    , m_mountPoint( QString() )
-    , m_deviceNode( QString() )
-    , m_ipodAlbumList( 0 )
+      , m_itdb( 0 )
+      , m_ipodInfo( 0 )
+      , m_ipodHeader( 0 )
+      , m_mountPoint( QString() )
+      , m_deviceNode( QString() )
+      , m_ipodAlbumList( 0 )
 {
     s_instance   = this;
 
@@ -115,32 +116,21 @@ UploadDialog::UploadDialog
     // ---------------------------------------------------------------
     // About data and help button.
 
-    m_about = new KPAboutData(ki18n("iPod Export"),
-                                           0,
-                                           KAboutData::License_GPL,
-                                           ki18n("A tool to export image to an iPod device"),
-                                           ki18n("(c) 2006-2008, Seb Ruiz\n"
-                                                 "(c) 2008-2012, Gilles Caulier"));
+    KPAboutData* about = new KPAboutData(ki18n("iPod Export"),
+                                         0,
+                                         KAboutData::License_GPL,
+                                         ki18n("A tool to export image to an iPod device"),
+                                         ki18n("(c) 2006-2008, Seb Ruiz\n"
+                                               "(c) 2008-2012, Gilles Caulier"));
 
-    m_about->addAuthor(ki18n("Seb Ruiz"), ki18n("Author and Maintainer"),
-                       "ruiz@kde.org");
+    about->addAuthor(ki18n("Seb Ruiz"), ki18n("Author and Maintainer"),
+                     "ruiz@kde.org");
 
-    m_about->addAuthor(ki18n("Gilles Caulier"), ki18n("Developer"),
-                       "caulier dot gilles at gmail dot com");
+    about->addAuthor(ki18n("Gilles Caulier"), ki18n("Developer"),
+                     "caulier dot gilles at gmail dot com");
 
-    // ------------------------------------------------------------
-
-    disconnect(this, SIGNAL(helpClicked()),
-               this, SLOT(slotHelp()) );
-
-    KHelpMenu* helpMenu = new KHelpMenu( this, m_about, false );
-    QAction* handbook   = new QAction( i18n("Plugin Handbook"), this );
-    connect(handbook, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelp()) );
-
-    helpMenu->menu()->removeAction( helpMenu->menu()->actions().first() );
-    helpMenu->menu()->insertAction( helpMenu->menu()->actions().first(), handbook );
-    button( Help )->setDelayedMenu( helpMenu->menu() );
+    about->handbookEntry = QString("ipodexport");
+    setAboutData(about);
 
     // ------------------------------------------------------------
 
@@ -271,10 +261,10 @@ UploadDialog::UploadDialog
     connect(m_uploadList, SIGNAL(signalAddedDropItems(QStringList)),
             this, SLOT(addDropItems(QStringList)) );
 
-    connect(m_uploadList, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+    connect(m_uploadList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
             this, SLOT(imageSelected(QTreeWidgetItem*)));
 
-    connect(m_ipodAlbumList, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+    connect(m_ipodAlbumList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
             this, SLOT(ipodItemSelected(QTreeWidgetItem*)));
 }
 
@@ -282,13 +272,6 @@ UploadDialog::~UploadDialog()
 {
     if( m_itdb )
         itdb_photodb_free( m_itdb );
-
-    delete m_about;
-}
-
-void UploadDialog::slotHelp()
-{
-    KToolInvocation::invokeHelp("ipodexport", "kipi-plugins");
 }
 
 void UploadDialog::slotClose()
@@ -338,13 +321,13 @@ void UploadDialog::getIpodAlbums()
     // clear cache
     m_ipodAlbumList->clear();
 
-    for( GList *it = m_itdb->photoalbums; it; it = it->next )
+    for( GList* it = m_itdb->photoalbums; it; it = it->next )
     {
-        Itdb_PhotoAlbum *ipodAlbum = (Itdb_PhotoAlbum *) it->data;
+        Itdb_PhotoAlbum *ipodAlbum = (Itdb_PhotoAlbum*) it->data;
 
         kDebug() << " found album: " << ipodAlbum->name ;
 
-        IpodAlbumItem *albumItem = new IpodAlbumItem( m_ipodAlbumList, ipodAlbum );
+        IpodAlbumItem* albumItem   = new IpodAlbumItem( m_ipodAlbumList, ipodAlbum );
 
         m_ipodAlbumList->addTopLevelItem( albumItem );
 
@@ -358,6 +341,7 @@ void UploadDialog::getIpodAlbumPhotos(IpodAlbumItem* const item, Itdb_PhotoAlbum
         return;
 
     IpodPhotoItem* last = 0;
+
     for( GList* it = album->members; it; it = it->next )
     {
         Itdb_Artwork* photo = (Itdb_Artwork*) it->data;
@@ -400,7 +384,7 @@ void UploadDialog::enableButtons()
 
     m_transferImagesButton->setEnabled( transfer );
 
-    enableButton( KDialog::Close, !m_transferring );
+    enableButton( Close, !m_transferring );
 
     const QList<QTreeWidgetItem*> ipodSelection = m_ipodAlbumList->selectedItems();
 
@@ -421,14 +405,15 @@ void UploadDialog::startTransfer()
 
     QTreeWidgetItem* selected = m_ipodAlbumList->currentItem();
     IpodAlbumItem* ipodAlbum  = dynamic_cast<IpodAlbumItem*>( selected );
+
     if( !selected || !ipodAlbum )
         return;
 
     m_transferring         = true;
     Itdb_PhotoAlbum* album = ipodAlbum->photoAlbum();
 
-    enableButton(KDialog::User1, false);
-    enableButton(KDialog::Close, false);
+    enableButton(User1, false);
+    enableButton(Close, false);
 
     GError* err = 0;
 
@@ -438,7 +423,8 @@ void UploadDialog::startTransfer()
         kDebug() << "Uploading "      << item->pathSrc()
                  << " to ipod album " << album->name ;
 
-        Itdb_Artwork *art = itdb_photodb_add_photo( m_itdb, QFile::encodeName( item->pathSrc() ), 0, 0, &err );
+        Itdb_Artwork* art = itdb_photodb_add_photo( m_itdb, QFile::encodeName( item->pathSrc() ), 0, 0, &err );
+
         if( !art )
         {
             if( err )
@@ -597,7 +583,7 @@ void UploadDialog::imagesFilesButtonRem()
     QList<QTreeWidgetItem*> selected = m_uploadList->selectedItems();
     qDeleteAll( selected );
 
-    enableButton( KDialog::User1, m_uploadList->model()->hasChildren() );
+    enableButton( User1, m_uploadList->model()->hasChildren() );
 }
 
 void UploadDialog::createIpodAlbum()
@@ -618,7 +604,7 @@ void UploadDialog::createIpodAlbum()
     {
         kDebug() << "creating album " << newAlbum ;
 
-        Itdb_PhotoAlbum *photoAlbum = itdb_photodb_photoalbum_create( m_itdb, QFile::encodeName( newAlbum ), -1/*end*/ );
+        Itdb_PhotoAlbum* photoAlbum = itdb_photodb_photoalbum_create( m_itdb, QFile::encodeName( newAlbum ), -1/*end*/ );
         // add the new album to the list view
         new IpodAlbumItem( m_ipodAlbumList, photoAlbum );
         m_ipodAlbumList->clearSelection();
@@ -732,7 +718,7 @@ void UploadDialog::deleteIpodAlbum()
         }
     }
 
-    GError *err = 0;
+    GError* err = 0;
     itdb_photodb_write( m_itdb, &err );
 }
 
@@ -746,7 +732,7 @@ void UploadDialog::addDropItems(const QStringList& filesPath)
         addUrlToList( dropFile );
     }
 
-    enableButton( KDialog::User1, m_uploadList->model()->hasChildren() > 0 );
+    enableButton( User1, m_uploadList->model()->hasChildren() > 0 );
 }
 
 void UploadDialog::addUrlToList(const QString& file)
@@ -765,9 +751,9 @@ bool UploadDialog::openDevice()
     }
 
     // try to find a mounted ipod
-    bool ipodFound = false;
-
+    bool ipodFound                       = false;
     KMountPoint::List currentmountpoints = KMountPoint::currentMountPoints();
+
     for( KMountPoint::List::Iterator mountiter = currentmountpoints.begin();
          mountiter != currentmountpoints.end(); ++mountiter )
     {
@@ -800,9 +786,10 @@ bool UploadDialog::openDevice()
 
         /// Here, we have found an ipod, but we are not sure if the photo db exists.
         /// Try and parse it to determine whether we have initialised the iPod.
-        ipodFound = true;
-        GError *err = 0;
-        m_itdb = itdb_photodb_parse( QFile::encodeName( mountpoint ), &err );
+        ipodFound   = true;
+        GError* err = 0;
+        m_itdb      = itdb_photodb_parse( QFile::encodeName( mountpoint ), &err );
+
         if( err )
         {
             g_error_free( err );
@@ -838,7 +825,7 @@ bool UploadDialog::openDevice()
                             m_mountPoint);
 
         if( KMessageBox::warningContinueCancel( this, msg, i18n( "Initialize iPod Photo Database?" ),
-                    KGuiItem(i18n("&Initialize"), "new") ) == KMessageBox::Continue )
+                         KGuiItem(i18n("&Initialize"), "new") ) == KMessageBox::Continue )
         {
 
             m_itdb = itdb_photodb_create( QFile::encodeName( m_mountPoint ) );
@@ -850,7 +837,7 @@ bool UploadDialog::openDevice()
                 return false;
             }
 
-            GError *err = 0;
+            GError* err = 0;
             itdb_photodb_write( m_itdb, &err );
         }
         else
@@ -867,9 +854,9 @@ Itdb_Artwork* UploadDialog::photoFromId(const uint id) const
     if( !m_itdb )
         return 0;
 
-    for( GList *it = m_itdb->photos; it; it=it->next )
+    for( GList* it = m_itdb->photos; it; it=it->next )
     {
-        Itdb_Artwork *photo = (Itdb_Artwork*)it->data;
+        Itdb_Artwork* photo = (Itdb_Artwork*)it->data;
         if( !photo )
             return 0;
 

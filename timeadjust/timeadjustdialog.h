@@ -6,6 +6,7 @@
  * Date        : 2004-05-16
  * Description : a plugin to set time stamp of picture files.
  *
+ * Copyright (C) 2012      by Smit Mehta <smit dot meh at gmail dot com>
  * Copyright (C) 2003-2005 by Jesper Pedersen <blackie@kde.org>
  * Copyright (C) 2006-2012 by Gilles Caulier <caulier dot gilles at gmail dot com>
  *
@@ -35,6 +36,7 @@
 // Local includes
 
 #include "kptooldialog.h"
+#include "timeadjustsettings.h"
 
 using namespace KIPIPlugins;
 
@@ -47,10 +49,14 @@ class TimeAdjustDialog : public KPToolDialog
 
 public:
 
-    TimeAdjustDialog(QWidget* const parent);
+    TimeAdjustDialog(QWidget* const parent=0);
     ~TimeAdjustDialog();
 
-    void setImages(const KUrl::List& images);
+    void addItems(const KUrl::List& images);
+
+Q_SIGNALS:
+
+    void signalMyCloseClicked();
 
 protected:
 
@@ -58,23 +64,40 @@ protected:
 
 private Q_SLOTS:
 
-    void slotSrcTimestampChanged();
-    void slotResetDateToCurrent();
-    void slotAdjustmentTypeChanged();
-    void slotDetAdjustmentByClockPhoto();
-    void slotUpdateExample();
-    void slotOk();
-    void slotCancel();
+    void slotApplyClicked();
+    void slotCloseClicked();
+    void slotProgressChanged(int);
+    void slotThreadFinished();
+    void slotCancelThread();
+    void slotButtonClicked(int);
+    void slotProcessStarted(const KUrl&);
+    void slotProcessEnded(const KUrl&, int);
+    void setBusy(bool);
+
+    /** Read the Used Timestamps for all selected files
+     * (according to the newly selected source timestamp type),
+     * this will also implicitly update listview info.
+     */
+    void slotReadTimestamps();
 
 private:
 
-    void readExampleTimestamps();
+    /** Called by readTimestamps() to get KIPI host timestamps
+     */
     void readApplicationTimestamps();
+
+    /** Called by readTimestamps() to get file timestamps
+     */
     void readFileTimestamps();
+
+    /** Called by readTimestamps() to get file metadata timestamps
+     */
     void readMetadataTimestamps();
+
     void readSettings();
     void saveSettings();
-    QDateTime calculateAdjustedTime(const QDateTime& time) const;
+
+    void updateListView();
 
 private:
 

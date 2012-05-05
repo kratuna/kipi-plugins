@@ -7,7 +7,7 @@
  * @date   2006-05-16
  * @brief  A plugin to synchronize pictures with a GPS device.
  *
- * @author Copyright (C) 2006-2011 by Gilles Caulier
+ * @author Copyright (C) 2006-2012 by Gilles Caulier
  *         <a href="mailto:caulier dot gilles at gmail dot com">caulier dot gilles at gmail dot com</a>
  * @author Copyright (C) 2010 by Michael G. Hansen
  *         <a href="mailto:mike at mghansen dot de">mike at mghansen dot de</a>
@@ -36,7 +36,6 @@
 
 // KDE includes
 
-#include <kdialog.h>
 #include <kurl.h>
 
 // Libkgeomap includes
@@ -48,10 +47,18 @@
 
 #include <libkipi/interface.h>
 
+// Local includes
+
+#include "kptooldialog.h"
+
 namespace KGeoMap
 {
     class KGeoMapWidget;
 }
+
+using namespace KIPI;
+using namespace KIPIPlugins;
+using namespace KGeoMap;
 
 namespace KIPIGPSSyncPlugin
 {
@@ -59,7 +66,7 @@ namespace KIPIGPSSyncPlugin
 class KipiImageModel;
 class GPSUndoCommand;
 
-class GPSSyncKGeoMapModelHelper : public KGeoMap::ModelHelper
+class GPSSyncKGeoMapModelHelper : public ModelHelper
 {
     Q_OBJECT
 
@@ -70,16 +77,16 @@ public:
 
     virtual QAbstractItemModel* model() const;
     virtual QItemSelectionModel* selectionModel() const;
-    virtual bool itemCoordinates(const QModelIndex& index, KGeoMap::GeoCoordinates* const coordinates) const;
+    virtual bool itemCoordinates(const QModelIndex& index, GeoCoordinates* const coordinates) const;
     virtual Flags modelFlags() const;
 
     virtual QPixmap pixmapFromRepresentativeIndex(const QPersistentModelIndex& index, const QSize& size);
     virtual QPersistentModelIndex bestRepresentativeIndexFromList(const QList<QPersistentModelIndex>& list, const int sortKey);
 
     virtual void onIndicesMoved(const QList<QPersistentModelIndex>& movedMarkers, 
-                                const KGeoMap::GeoCoordinates& targetCoordinates, const QPersistentModelIndex& targetSnapIndex);
+                                const GeoCoordinates& targetCoordinates, const QPersistentModelIndex& targetSnapIndex);
 
-    void addUngroupedModelHelper(KGeoMap::ModelHelper* const newModelHelper);
+    void addUngroupedModelHelper(ModelHelper* const newModelHelper);
 
 private Q_SLOTS:
 
@@ -97,13 +104,13 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 
-class GPSSyncDialog : public KDialog
+class GPSSyncDialog : public KPToolDialog
 {
     Q_OBJECT
 
 public:
 
-    GPSSyncDialog(KIPI::Interface* interface, QWidget* parent);
+    GPSSyncDialog(Interface* const interface, QWidget* const parent);
     ~GPSSyncDialog();
 
     void setImages(const KUrl::List& images);
@@ -111,14 +118,14 @@ public:
 protected:
 
     void closeEvent(QCloseEvent* e);
-    bool eventFilter( QObject *, QEvent *);
+    bool eventFilter(QObject*, QEvent*);
 
 private:
 
     void readSettings();
     void saveSettings();
     void saveChanges(const bool closeAfterwards);
-    KGeoMap::KGeoMapWidget* makeMapWidget(QWidget** const pvbox);
+    KGeoMapWidget* makeMapWidget(QWidget** const pvbox);
     void adjustMapLayout(const bool syncSettings);
 
 private Q_SLOTS:
@@ -139,7 +146,6 @@ private Q_SLOTS:
     void slotCurrentTabChanged(int);
     void slotBookmarkVisibilityToggled();
     void slotSetupChanged();
-    void slotHelp();
 
 private:
 

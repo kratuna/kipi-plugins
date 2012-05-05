@@ -98,7 +98,13 @@ public:
     KPProgressWidget* progressBar() const;
 
     QString author() const;
+    int dimension() const;
+    int quality() const;
+    bool resize() const;
+    QString categories() const;
     QString license() const;
+    QString description() const;
+    QString date() const;
 
     QMap <QString,QMap <QString,QString> > allImagesDesc() const;
 
@@ -133,7 +139,7 @@ private:
 
 
 
-    KVBox*                     m_uploadBox;
+    KHBox*                     m_uploadBox;
     QWidget*                   m_fileBox;
     KLineEdit*                 m_titleEdit;
     KLineEdit*                 m_descEdit;
@@ -141,6 +147,13 @@ private:
     KLineEdit*                 m_longitudeEdit;
     KLineEdit*                 m_latitudeEdit;
     KLineEdit*                 m_categoryEdit;
+
+    QCheckBox*                 m_titleCheck;
+    QCheckBox*                 m_descCheck;
+    QCheckBox*                 m_dateCheck;
+    QCheckBox*                 m_longitudeCheck;
+    QCheckBox*                 m_latitudeCheck;
+    QCheckBox*                 m_categoryCheck;
 
     KVBox*                     m_userBox;
     QWidget*                   m_loginBox;

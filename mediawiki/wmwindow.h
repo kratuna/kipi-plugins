@@ -25,25 +25,20 @@
 #ifndef WMWINDOW_H
 #define WMWINDOW_H
 
-// KDE includes
-
-#include <kdialog.h>
-
 // MediaWiki includes
 
 #include <libmediawiki/login.h>
 #include <libmediawiki/mediawiki.h>
+
+// Local includes
+
+#include "kptooldialog.h"
 
 class QCloseEvent;
 
 namespace KIPI
 {
     class Interface;
-}
-
-namespace KIPIPlugins
-{
-    class KPAboutData;
 }
 
 using namespace KIPI;
@@ -57,7 +52,7 @@ class WmWidget;
 class WmLogin;
 class WikiMediaJob;
 
-class WMWindow : public KDialog
+class WMWindow : public KPToolDialog
 {
     Q_OBJECT
 
@@ -67,16 +62,17 @@ public:
     ~WMWindow();
 
     void reactivate();
+    QString getImageCaption(const QString& fileName);
+    bool prepareImageForUpload(const QString& imgPath,QString& caption);
 
 private Q_SLOTS:
 
     void slotClose();
-    void slotHelp();
     void slotStartTransfer();
     void slotChangeUserClicked();
     void slotDoLogin(const QString& login, const QString& pass, const QUrl& wiki);
     void slotEndUpload();
-    int  loginHandle(KJob* loginJob);
+    int  slotLoginHandle(KJob* loginJob);
 
 private:
 
@@ -96,7 +92,6 @@ private:
     MediaWiki*    m_mediawiki;
 
     Interface*    m_interface;
-    KPAboutData*  m_about;
     WmLogin*      m_dlgLoginExport;
     WikiMediaJob* m_uploadJob;
 };

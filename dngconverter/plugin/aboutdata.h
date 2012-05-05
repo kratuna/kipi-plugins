@@ -24,13 +24,12 @@
 #ifndef ABOUTDATA_H
 #define ABOUTDATA_H
 
-#include <QFileInfo>
 #include <QString>
 
 // LibKDcraw includes
 
-#include <libkdcraw/kdcraw.h>
 #include <libkdcraw/version.h>
+#include <libkdcraw/kdcraw.h>
 
 // Local includes
 
@@ -60,10 +59,9 @@ public:
                             .subs(KDcraw::version())
                             .subs(QString(XMP_API_VERSION_STRING)),
                       ki18n("(c) 2008-2012, Gilles Caulier\n"
-                            "(c) 2010-2011, Jens Mueller"))
+                            "(c) 2010-2011, Jens Mueller\n"
+                            "(c) 2012, Smit Mehta"))
     {
-         handbookEntry = QString("dngconverter");
-
          addAuthor(ki18n("Gilles Caulier"),
                    ki18n("Author"),
                    "caulier dot gilles at gmail dot com");
@@ -71,23 +69,15 @@ public:
          addAuthor(ki18n("Jens Mueller"),
                    ki18n("Developer"),
                    "tschenser at gmx dot de");
+
+         addAuthor(ki18n("Smit Mehta"),
+                   ki18n("Developer"),
+                   "smit dot meh at gmail dot com");
+
+        handbookEntry = QString("dngconverter");
     }
 
     ~DNGConverterAboutData(){}
-
-    static bool isRAWFile(const QString& filePath)
-    {
-
-        QString rawFilesExt(KDcrawIface::KDcraw::rawFiles());
-        QFileInfo fileInfo(filePath);
-        if (fileInfo.suffix().toUpper() != QString("DNG"))
-        {
-            if (rawFilesExt.toUpper().contains( fileInfo.suffix().toUpper() ))
-                return true;
-        }
-
-        return false;
-    }
 };
 
 } // namespace KIPIDNGConverterPlugin

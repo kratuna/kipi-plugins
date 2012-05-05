@@ -26,14 +26,14 @@
 #ifndef GALLERYWINDOW_H
 #define GALLERYWINDOW_H
 
-// KDE includes
-
-#include <kdialog.h>
-
 // Qt includes
 
 #include <QList>
 #include <QProgressDialog>
+
+// Local includes
+
+#include "kptooldialog.h"
 
 namespace KIPI
 {
@@ -55,7 +55,7 @@ class GalleryTalker;
 class GAlbum;
 class GPhoto;
 
-class GalleryWindow : public KDialog
+class GalleryWindow : public KPToolDialog
 {
     Q_OBJECT
 
@@ -86,21 +86,11 @@ private Q_SLOTS:
     void slotAddPhotoSucceeded();
     void slotAddPhotoFailed(const QString& msg);
     void slotAddPhotoCancel();
-    void slotHelp();
     void slotEnableSpinBox(int n);
     void slotSettings();
     void slotProcessUrl(const QString&);
 
 private:
-
-    KPAboutData*     m_about;
-    GalleryTalker*   m_talker;
-
-    QProgressDialog* m_progressDlg;
-    unsigned int     m_uploadCount;
-    unsigned int     m_uploadTotal;
-    QStringList*     m_uploadList;
-    QString          m_firstAlbumName;
 
     class Private;
     Private* const d;

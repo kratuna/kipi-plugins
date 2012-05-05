@@ -28,7 +28,7 @@
 
 #include <QLayout>
 #include <QCloseEvent>
-
+#include <QFileInfo>
 // KDE includes
 
 #include <kdebug.h>
@@ -36,12 +36,10 @@
 #include <klocale.h>
 #include <kmenu.h>
 #include <kurl.h>
-#include <khelpmenu.h>
 #include <klineedit.h>
 #include <kcombobox.h>
 #include <kpushbutton.h>
 #include <kmessagebox.h>
-#include <ktoolinvocation.h>
 
 // Mediawiki includes
 
@@ -65,7 +63,7 @@ namespace KIPIWikiMediaPlugin
 {
 
 WMWindow::WMWindow(Interface* const interface, const QString& tmpFolder, QWidget* const /*parent*/)
-    : KDialog(0)
+    : KPToolDialog(0)
 {
     m_tmpPath.clear();
     m_tmpDir    = tmpFolder;
@@ -84,32 +82,27 @@ WMWindow::WMWindow(Interface* const interface, const QString& tmpFolder, QWidget
     setButtonGuiItem(User1,
                      KGuiItem(i18n("Start Upload"), "network-workgroup",
                               i18n("Start upload to Wikimedia Commons")));
-    enableButton(User1,false);
+    enableButton(User1, false);
     m_widget->setMinimumSize(700, 500);
 
-    m_about = new KIPIPlugins::KPAboutData(ki18n("Wikimedia Commons Export"), 0,
-                               KAboutData::License_GPL,
-                               ki18n("A Kipi plugin to export image collection "
-                                     "to Wikimedia Commons.\n"
-                                     "Using libmediawiki version %1").subs(QString(mediawiki_version)),
-                               ki18n("(c) 2011, Alexandre Mendes"));
+    KPAboutData* about = new KPAboutData(ki18n("Wikimedia Commons Export"), 0,
+                                         KAboutData::License_GPL,
+                                         ki18n("A Kipi plugin to export image collection "
+                                               "to Wikimedia Commons.\n"
+                                               "Using libmediawiki version %1").subs(QString(mediawiki_version)),
+                                         ki18n("(c) 2011, Alexandre Mendes"));
 
-    m_about->addAuthor(ki18n("Alexandre Mendes"), ki18n("Author"),
-                       "alex dot mendes1988 at gmail dot com");
+    about->addAuthor(ki18n("Alexandre Mendes"), ki18n("Author"),
+                     "alex dot mendes1988 at gmail dot com");
 
-    m_about->addAuthor(ki18n("Guillaume Hormiere"), ki18n("Developer"),
-                       "hormiere dot guillaume at gmail dot com");
+    about->addAuthor(ki18n("Guillaume Hormiere"), ki18n("Developer"),
+                     "hormiere dot guillaume at gmail dot com");
 
-    m_about->addAuthor(ki18n("Gilles Caulier"), ki18n("Developer"),
-                       "caulier dot gilles at gmail dot com");
+    about->addAuthor(ki18n("Gilles Caulier"), ki18n("Developer"),
+                     "caulier dot gilles at gmail dot com");
 
-    KHelpMenu* helpMenu = new KHelpMenu(this, m_about, false);
-    helpMenu->menu()->removeAction(helpMenu->menu()->actions().first());
-    QAction* handbook   = new QAction(i18n("Handbook"), this);
-    connect(handbook, SIGNAL(triggered(bool)),
-            this, SLOT(slotHelp()));
-    helpMenu->menu()->insertAction(helpMenu->menu()->actions().first(), handbook);
-    button(Help)->setMenu(helpMenu->menu());
+    about->handbookEntry = QString("wikimedia");
+    setAboutData(about);
 
     connect(this, SIGNAL(user1Clicked()),
             this, SLOT(slotStartTransfer()));
@@ -132,7 +125,6 @@ WMWindow::WMWindow(Interface* const interface, const QString& tmpFolder, QWidget
 
 WMWindow::~WMWindow()
 {
-    delete m_about;
 }
 
 void WMWindow::closeEvent(QCloseEvent* e)
@@ -172,11 +164,6 @@ void WMWindow::saveSettings()
     config.sync();
 }
 
-void WMWindow::slotHelp()
-{
-    KToolInvocation::invokeHelp("wikimedia", "kipi-plugins");
-}
-
 void WMWindow::slotClose()
 {
     m_widget->progressBar()->progressCompleted();
@@ -184,6 +171,57 @@ void WMWindow::slotClose()
     done(Close);
 }
 
+QString WMWindow::getImageCaption(const QString& fileName)
+{
+    KPImageInfo info(fileName);
+    // Facebook doesn't support image titles. Include it in descriptions if needed.
+    QStringList descriptions = QStringList() << info.title() << info.description();
+    descriptions.removeAll("");
+    return descriptions.join("\n\n");
+}
+bool WMWindow::prepareImageForUpload(const QString& imgPath, QString& caption)
+{
+    QImage image;
+    image.load(imgPath);
+
+
+    if (image.isNull())
+    {
+        return false;
+    }
+
+    // get temporary file name
+    m_tmpPath = m_tmpDir + QFileInfo(imgPath).baseName().trimmed() + ".jpg";
+
+    // rescale image if requested
+    int maxDim = m_widget->dimension();
+
+    if (image.width() > maxDim || image.height() > maxDim)
+    {
+        kDebug() << "Resizing to " << maxDim;
+        image = image.scaled(maxDim, maxDim, Qt::KeepAspectRatio,
+                             Qt::SmoothTransformation);
+    }
+
+    kDebug() << "Saving to temp file: " << m_tmpPath;
+    image.save(m_tmpPath, "JPEG", m_widget->quality());
+
+    // copy meta data to temporary image
+    KPMetadata meta;
+
+    if (meta.load(imgPath))
+    {
+        caption = getImageCaption(imgPath);
+        meta.setImageDimensions(image.size());
+        meta.save(m_tmpPath);
+    }
+    else
+    {
+        caption.clear();
+    }
+
+    return true;
+}
 void WMWindow::slotStartTransfer()
 {
     saveSettings();
@@ -192,35 +230,41 @@ void WMWindow::slotStartTransfer()
     QList<QMap<QString, QString> > imageDesc;
     QString author  = m_widget->author();
     QString license = m_widget->license();
-
-    QString category;
-
+    QString categories = m_widget->categories();
+    QString description = m_widget->description();
+    QString date = m_widget->date();
     for (int i = 0; i < urls.size(); ++i)
     {
+
+
+        QString caption;
+
+        if(m_widget->resize()){
+
+            prepareImageForUpload(urls.at(i).path(), caption);
+
+
+        }
+
         KPImageInfo info(urls.at(i));
-
-        QStringList keywar = info.keywords();
         QMap<QString, QString> map;
-
 
         map["url"]         = urls.at(i).path();
         map["license"]     = license;
         map["author"]      = author;
-        map["description"] = info.description();
-        map["time"]        = info.date().toString(Qt::ISODate);
+        map["description"] = description;
+        map["time"]        = date;
+        qCritical("windows slotStartTras");
 
-        for( int i = keywar.size()-1; i > 0; i--)
-        {
-            if(keywar.at(i).contains("wikimedia"))
-            category.append(" "+keywar.at(i)+"\n|[[Category:");
-        }
-        map["categories"] = category;
+        map["categories"] = categories;
 
         if(info.hasGeolocationInfo())
         {
             map["latitude"]  = QString::number(info.latitude());
             map["longitude"] = QString::number(info.longitude());
             map["altitude"]  = QString::number(info.altitude());
+          /*  if(!caption.isEmpty())
+             map["caption"] = caption;*/
         }
 
         imageDesc << map;
@@ -258,12 +302,12 @@ void WMWindow::slotDoLogin(const QString& login, const QString& pass, const QUrl
     Login* loginJob = new Login(*m_mediawiki, login, pass);
 
     connect(loginJob, SIGNAL(result(KJob*)), 
-            this, SLOT(loginHandle(KJob*)));
+            this, SLOT(slotLoginHandle(KJob*)));
 
     loginJob->start();
 }
 
-int WMWindow::loginHandle(KJob* loginJob)
+int WMWindow::slotLoginHandle(KJob* loginJob)
 {
     kDebug() << loginJob->error();
 
