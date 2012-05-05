@@ -64,6 +64,7 @@
 
 // Local includes
 
+#include "kpimageinfo.h"
 #include "kpimageslist.h"
 #include "kpprogresswidget.h"
 #include "wmwidget.h"
@@ -122,12 +123,40 @@ WmWidget::WmWidget(QWidget* const parent)
     m_fileBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* fileBoxLayout = new QGridLayout(m_fileBox);
 
-    m_titleEdit   = new KLineEdit(m_fileBox);
-    m_descEdit   = new KLineEdit(m_fileBox);
-    m_dateEdit   = new KLineEdit(m_fileBox);
-    m_longitudeEdit   = new KLineEdit(m_fileBox);
-    m_latitudeEdit   = new KLineEdit(m_fileBox);
-    m_categoryEdit   = new KLineEdit(m_fileBox);
+
+    QString currentCategories;
+    QString date ;
+    KUrl::List urls = m_imgList->imageUrls(false);
+    QString title;
+    QString description;
+    QString longitude;
+    QString latitude;
+
+    for(int j = 0; j < urls.size(); j++)
+    {
+        KPImageInfo info(urls.at(j).path());
+        QStringList keywar = info.keywords();
+        date = info.date().toString(Qt::ISODate);
+        title = info.title();
+        description = info.description();
+        longitude = info.longitude();
+        latitude = info.latitude();
+        for( int i = 0; i < keywar.size(); i++)
+        {
+            if(i==keywar.size()-1){
+                currentCategories.append(keywar.at(i));
+            }else{
+                currentCategories.append(keywar.at(i)+", ");
+            }
+        }
+    }
+
+    m_dateEdit   = new KLineEdit(date, m_fileBox);
+    m_categoryEdit   = new KLineEdit(currentCategories, m_fileBox);
+    m_titleEdit   = new KLineEdit(title, m_fileBox);
+    m_descEdit   = new KLineEdit(description, m_fileBox);
+    m_longitudeEdit   = new KLineEdit(longitude, m_fileBox);
+    m_latitudeEdit   = new KLineEdit(latitude, m_fileBox);
 
     QLabel* titleLabel     = new QLabel(m_fileBox);
     titleLabel->setText(i18n("Title:"));
@@ -163,25 +192,25 @@ WmWidget::WmWidget(QWidget* const parent)
     uploadBoxLayout->addWidget(m_fileBox,0,Qt::AlignTop);
 
     fileBoxLayout->addWidget(titleLabel, 1, 0,1,1);
-    fileBoxLayout->addWidget(descLabel, 2, 0,1,1);
-    fileBoxLayout->addWidget(dateLabel, 3, 0,1,1);
-    fileBoxLayout->addWidget(longitudeLabel, 4, 0,1,1);
+    fileBoxLayout->addWidget(dateLabel, 2, 0,1,1);
+    fileBoxLayout->addWidget(categoryLabel, 3, 0,1,1);
+    fileBoxLayout->addWidget(descLabel, 4, 0,1,1);
     fileBoxLayout->addWidget(latitudeLabel, 5, 0,1,1);
-    fileBoxLayout->addWidget(categoryLabel, 6, 0,1,1);
+    fileBoxLayout->addWidget(longitudeLabel, 6, 0,1,1);
 
     fileBoxLayout->addWidget(m_titleEdit, 1, 1,1,3);
-    fileBoxLayout->addWidget(m_descEdit, 2, 1,1,3);
-    fileBoxLayout->addWidget(m_dateEdit, 3, 1,1,3);
-    fileBoxLayout->addWidget(m_longitudeEdit, 4, 1,1,3);
+    fileBoxLayout->addWidget(m_dateEdit, 2, 1,1,3);
+    fileBoxLayout->addWidget(m_categoryEdit, 3, 1,1,3);
+    fileBoxLayout->addWidget(m_descEdit, 4, 1,1,3);
     fileBoxLayout->addWidget(m_latitudeEdit, 5, 1,1,3);
-    fileBoxLayout->addWidget(m_categoryEdit, 6, 1,1,3);
+    fileBoxLayout->addWidget(m_longitudeEdit, 6, 1,1,3);
 
     fileBoxLayout->addWidget(m_titleCheck, 1, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_descCheck, 2, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_dateCheck, 3, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_longitudeCheck, 4, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_dateCheck, 2, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_descCheck, 3, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_categoryCheck, 4, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_latitudeCheck, 5, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_categoryCheck, 6, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_longitudeCheck, 6, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(applySelectBtn,7,3,1,1);
     fileBoxLayout->addWidget(applyAllBtn,7,4,1,1,Qt::AlignCenter);
 
@@ -249,7 +278,7 @@ WmWidget::WmWidget(QWidget* const parent)
 //---newWiki---
 
     m_newWikiSv = new QScrollArea(this);
-    KVBox* newWikiPanel    = new KVBox(m_newWikiSv->viewport());
+    KVBox* newWikiPanel = new KVBox(m_newWikiSv->viewport());
     newWikiPanel->setAutoFillBackground(false);
     m_newWikiSv->setWidget(newWikiPanel);
     m_newWikiSv->setWidgetResizable(true);
@@ -422,7 +451,7 @@ WmWidget::WmWidget(QWidget* const parent)
 
     // ------------------------------------------------------------------------
 
-    m_progressBar = new KPProgressWidget(pan);
+    m_progressBar = new KPProgressWidget(this);
     m_progressBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     m_progressBar->hide();
 
@@ -435,6 +464,7 @@ WmWidget::WmWidget(QWidget* const parent)
     //mainLayout->addWidget(tabWidget,0,Qt::AlignLeft);
     mainLayout->addWidget(wrapper);
     mainLayout->setSpacing(KDialog::spacingHint());
+    mainLayout->addWidget(m_progressBar);
     mainLayout->setMargin(0);
 
     updateLabels();  // use empty labels until login
@@ -483,6 +513,8 @@ void WmWidget::readSettings(KConfigGroup& group)
             m_wikiSelect->addItem(m_WikisHistory.at(i),m_UrlsHistory.at(i));
         }
     }
+
+
 }
 
 void WmWidget::saveSettings(KConfigGroup& group)
@@ -620,12 +652,44 @@ QString WmWidget::author() const
     kDebug() << "WmWidget::author()";
     return m_authorEdit->text();
 }
+int WmWidget::quality() const
+{
+    kDebug() << "WmWidget::quality()";
+    return m_imageQualitySpB->value();
+}
 
+int WmWidget::dimension() const
+{
+    kDebug() << "WmWidget::dimension()";
+    return m_dimensionSpB->value();
+}
+bool WmWidget::resize() const
+{
+    kDebug() << "WmWidget::resize()";
+    return m_resizeChB->isChecked();
+}
 QString WmWidget::license() const
 {
     kDebug() << "WmWidget::license()";
 
     return m_licenseComboBox->itemData(m_licenseComboBox->currentIndex()).toString();
+}
+
+QString WmWidget::categories() const
+{
+    kDebug() << "WmWidget::categories()";
+    return m_categoryEdit->text();
+}
+QString WmWidget::description() const
+{
+    kDebug() << "WmWidget::description()";
+    return m_descEdit->text();
+
+}
+QString WmWidget::date() const
+{
+    kDebug() << "WmWidget::date()";
+    return m_dateEdit->text();
 }
 
 } // namespace KIPIWikimediaPlugin

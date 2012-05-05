@@ -98,7 +98,13 @@ public:
     KPProgressWidget* progressBar() const;
 
     QString author() const;
+    int dimension() const;
+    int quality() const;
+    bool resize() const;
+    QString categories() const;
     QString license() const;
+    QString description() const;
+    QString date() const;
 
     void readSettings(KConfigGroup& group);
     void saveSettings(KConfigGroup& group);
