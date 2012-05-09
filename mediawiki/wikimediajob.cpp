@@ -28,6 +28,7 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QTimer>
+#include <QStringList>
 
 // KDE includes
 
@@ -101,8 +102,9 @@ void WikiMediaJob::uploadHandle(KJob* j)
         QMap<QString,QString> info = m_imageDesc.takeFirst();
         Upload* e1      = new Upload( *m_mediawiki, this);
 
-        kDebug() << "image path : " << info["url"].remove("file://");
-        QFile* file = new QFile(info["url"].remove("file://"),this);
+        kDebug() << "image path : " << info["url"];
+
+        QFile* file = new QFile(info["url"],this);
         file->open(QIODevice::ReadOnly);
         //emit fileUploadProgress(done = 0, total file.size());
 
@@ -141,7 +143,7 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
     QString text;
     text.append(" == {{int:filedesc}} ==");
     text.append( "\n{{Information");
-    text.append( "\n|Description=").append( info["description"]);
+    text.append( "\n|Description=").append( "{{en |"+ info["description"]+"}}");
     text.append( "\n|Source=").append( "{{own}}");
     text.append( "\n|Author=");
 
@@ -151,8 +153,6 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
         text.append( info["author"]);
         text.append( "]]");
     }
-    
-    text.append("\n|[[Category:").append(info["categories"]);
     text.append( "\n|Date=").append( info["time"]);
     text.append( "\n|Permission=");
     text.append( "\n|other_versions=");
@@ -180,9 +180,21 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
         text.append( "\n}}");
     }
 
-    text.append( " == {{int:license}} ==");
-    if(info.contains("licence"))
-        text.append( info["licence"]);
+    text.append( "\n== {{int:license-header}} ==\n");
+    if(info.contains("license"))
+        text.append( info["license"]).append("\n");
+
+    if(info.contains("categories")){
+        text.append("[[Category:Uploaded with KIPI uploader]]\n");
+        QStringList categories = info["categories"].split(',');
+        for(int i = 0; i < categories.size(); i++){
+            if(!categories.at(i).isEmpty())
+               text.append("[[Category: "+categories.at(i) +"]\n");
+        }
+
+    }
+
+
 
     return text;
 }

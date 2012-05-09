@@ -28,7 +28,7 @@
 
 #include <QLayout>
 #include <QCloseEvent>
-
+#include <QFileInfo>
 // KDE includes
 
 #include <kdebug.h>
@@ -170,6 +170,57 @@ void WMWindow::slotClose()
     done(Close);
 }
 
+QString WMWindow::getImageCaption(const QString& fileName)
+{
+    KPImageInfo info(fileName);
+    // Facebook doesn't support image titles. Include it in descriptions if needed.
+    QStringList descriptions = QStringList() << info.title() << info.description();
+    descriptions.removeAll("");
+    return descriptions.join("\n\n");
+}
+bool WMWindow::prepareImageForUpload(const QString& imgPath, QString& caption)
+{
+    QImage image;
+    image.load(imgPath);
+
+
+    if (image.isNull())
+    {
+        return false;
+    }
+
+    // get temporary file name
+    m_tmpPath = m_tmpDir + QFileInfo(imgPath).baseName().trimmed() + ".jpg";
+
+    // rescale image if requested
+    int maxDim = m_widget->dimension();
+
+    if (image.width() > maxDim || image.height() > maxDim)
+    {
+        kDebug() << "Resizing to " << maxDim;
+        image = image.scaled(maxDim, maxDim, Qt::KeepAspectRatio,
+                             Qt::SmoothTransformation);
+    }
+
+    kDebug() << "Saving to temp file: " << m_tmpPath;
+    image.save(m_tmpPath, "JPEG", m_widget->quality());
+
+    // copy meta data to temporary image
+    KPMetadata meta;
+
+    if (meta.load(imgPath))
+    {
+        caption = getImageCaption(imgPath);
+        meta.setImageDimensions(image.size());
+        meta.save(m_tmpPath);
+    }
+    else
+    {
+        caption.clear();
+    }
+
+    return true;
+}
 void WMWindow::slotStartTransfer()
 {
     saveSettings();
@@ -177,34 +228,42 @@ void WMWindow::slotStartTransfer()
 
     QList<QMap<QString, QString> > imageDesc;
     QString author  = m_widget->author();
-    QString licence = m_widget->licence();
-    QString category;
-
+    QString license = m_widget->license();
+    QString categories = m_widget->categories();
+    QString description = m_widget->description();
+    QString date = m_widget->date();
     for (int i = 0; i < urls.size(); ++i)
     {
-        KPImageInfo info(urls.at(i));
 
-        QStringList keywar = info.keywords();
+
+        QString caption;
+
+        if(m_widget->resize()){
+
+            prepareImageForUpload(urls.at(i).path(), caption);
+
+
+        }
+
+        KPImageInfo info(urls.at(i));
         QMap<QString, QString> map;
 
-        map["url"]         = urls.at(i).url();
-        map["licence"]     = licence;
+        map["url"]         = urls.at(i).path();
+        map["license"]     = license;
         map["author"]      = author;
-        map["description"] = info.description();
-        map["time"]        = info.date().toString(Qt::ISODate);
+        map["description"] = description;
+        map["time"]        = date;
+        qCritical("windows slotStartTras");
 
-        for( int i = keywar.size(); i > 0; i--)
-        {
-            if(keywar.at(i).contains("wikimedia"))
-            category.append(" "+keywar.at(i)+"\n|[[Category:");
-        }
-        map["categories"] = category;
+        map["categories"] = categories;
 
         if(info.hasGeolocationInfo())
         {
             map["latitude"]  = QString::number(info.latitude());
             map["longitude"] = QString::number(info.longitude());
             map["altitude"]  = QString::number(info.altitude());
+          /*  if(!caption.isEmpty())
+             map["caption"] = caption;*/
         }
 
         imageDesc << map;

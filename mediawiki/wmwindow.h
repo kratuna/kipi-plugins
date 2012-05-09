@@ -62,6 +62,8 @@ public:
     ~WMWindow();
 
     void reactivate();
+    QString getImageCaption(const QString& fileName);
+    bool prepareImageForUpload(const QString& imgPath,QString& caption);
 
 private Q_SLOTS:
 
