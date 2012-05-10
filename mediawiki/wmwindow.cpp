@@ -235,20 +235,22 @@ void WMWindow::slotStartTransfer()
     for (int i = 0; i < urls.size(); ++i)
     {
 
-
+        QMap<QString, QString> map;
         QString caption;
-
+        QString url;
         if(m_widget->resize()){
 
             prepareImageForUpload(urls.at(i).path(), caption);
 
-
+            url = m_tmpPath;
+        }else{
+            url = urls.at(i).path();
         }
 
-        KPImageInfo info(urls.at(i));
-        QMap<QString, QString> map;
+        map["url"]         = url;
 
-        map["url"]         = urls.at(i).path();
+        KPImageInfo info(urls.at(i));
+
         map["license"]     = license;
         map["author"]      = author;
         map["description"] = description;
