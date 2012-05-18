@@ -6,7 +6,7 @@
  * Date        : 2010-11-15
  * Description : a kipi plugin to export images to VKontakte web service
  *
- * Copyright (C) 2011 by Alexander Potashev <aspotashev at gmail dot com>
+ * Copyright (C) 2011, 2012 by Alexander Potashev <aspotashev at gmail dot com>
  *
  * GUI based on Yandex.Fotki KIPI Plugin
  * Copyright (C) 2005-2008 by Vardhman Jain <vardhman at gmail dot com>
@@ -70,14 +70,16 @@ using namespace KIPIPlugins;
 namespace KIPIVkontaktePlugin
 {
 
+class VkAPI;
+class AlbumChooserWidget;
+
 class VkontakteWindow : public KPToolDialog
 {
     Q_OBJECT
 
 public:
 
-    VkontakteWindow(Interface* const interface,
-                    bool import, QWidget* const parent);
+    VkontakteWindow(bool import, QWidget* const parent);
     ~VkontakteWindow();
 
     /**
@@ -90,39 +92,22 @@ public:
 
 Q_SIGNALS:
 
-    void signalAuthenticationDone();
+    void signalUpdateAuthInfo();
+    void signalUpdateBusyStatus(bool busy);
 
 protected Q_SLOTS:
 
     // ui slots
     void slotChangeUserClicked();
 
-    // authentication
-    void slotApplicationPermissionCheckDone(KJob *kjob);
-    void slotAuthenticationDialogDone(const QString &accessToken);
-    void slotAuthenticationDialogCanceled();
-
     // requesting album information
-    void startAlbumsUpdate();
     void startGetFullName();
     void startGetUserId();
-    void startAlbumCreation(Vkontakte::AlbumInfoPtr album);
-    void startAlbumEditing(Vkontakte::AlbumInfoPtr album);
-    void startAlbumDeletion(Vkontakte::AlbumInfoPtr album);
-    void slotAlbumsUpdateDone(KJob *kjob);
     void slotGetFullNameDone(KJob *kjob);
     void slotGetUserIdDone(KJob *kjob);
-    void slotAlbumCreationDone(KJob *kjob);
-    void slotAlbumEditingDone(KJob *kjob);
-    void slotAlbumDeletionDone(KJob *kjob);
 
     // requesting photo information
     void slotPhotoUploadDone(KJob *kjob);
-
-    void slotNewAlbumRequest();
-    void slotEditAlbumRequest();
-    void slotDeleteAlbumRequest();
-    void slotReloadAlbumsRequest();
 
     void slotStartTransfer();
 
@@ -130,32 +115,30 @@ protected Q_SLOTS:
 
     void slotFinished();
 
+    void updateAuthInfo();
+    void updateBusyStatus(bool busy);
+
 protected:
+
+    void initAccountBox();
 
     void readSettings();
     void writeSettings();
 
     void reset();
-    void updateControls(bool val);
-    void updateLabels();
 
-    void handleVkError(KJob *kjob);
-
-    // authentication
-    bool isAuthenticated();
     void startAuthentication(bool forceLogout);
 
-    Vkontakte::AlbumInfoPtr currentAlbum();
-    void selectAlbum(int aid);
+    void handleVkError(KJob *kjob);
 
 protected:
 
     /// Plugin
     bool                           m_import;
-    Interface*                     m_interface;
 
     /// User interface
     QWidget*                       m_mainWidget;
+    QWidget*                       m_settingsBox;
 
     /// accounts
     QGroupBox*                     m_accountBox;
@@ -163,13 +146,8 @@ protected:
     QLabel*                        m_headerLabel;
     KPushButton*                   m_changeUserButton;
 
-    /// albums
-    QGroupBox*                     m_albumsBox;
-    KPushButton*                   m_newAlbumButton;
-    KPushButton*                   m_reloadAlbumsButton;
-    KComboBox*                     m_albumsCombo;
-    QToolButton*                   m_editAlbumButton;
-    QToolButton*                   m_deleteAlbumButton;
+    // album selection
+    AlbumChooserWidget*            m_albumsBox;
 
     /// options
 //     QCheckBox*                  m_checkKeepOriginal;
@@ -182,14 +160,11 @@ protected:
     /** Pointers to running jobs */
     QList<KJob*>                   m_jobs;
 
-    bool                           m_authenticated;
-    QString                        m_accessToken;
-    QList<Vkontakte::AlbumInfoPtr> m_albums;
+    VkAPI*                         m_vkapi;
 
     QString                        m_userFullName;
     int                            m_userId;
 
-    /** album with this "aid" will be selected in slotAlbumsUpdateDone() */
     int                            m_albumToSelect;
 
     QString                        m_appId;

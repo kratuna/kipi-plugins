@@ -62,12 +62,11 @@
 namespace KIPIWikiMediaPlugin
 {
 
-WMWindow::WMWindow(Interface* const interface, const QString& tmpFolder, QWidget* const /*parent*/)
+WMWindow::WMWindow(const QString& tmpFolder, QWidget* const /*parent*/)
     : KPToolDialog(0)
 {
     m_tmpPath.clear();
     m_tmpDir    = tmpFolder;
-    m_interface = interface;
     m_widget    = new WmWidget(this);
     m_uploadJob = 0;
     m_login     = QString();
@@ -101,7 +100,7 @@ WMWindow::WMWindow(Interface* const interface, const QString& tmpFolder, QWidget
     about->addAuthor(ki18n("Gilles Caulier"), ki18n("Developer"),
                      "caulier dot gilles at gmail dot com");
 
-    about->handbookEntry = QString("wikimedia");
+    about->setHandbookEntry("wikimedia");
     setAboutData(about);
 
     connect(this, SIGNAL(user1Clicked()),
@@ -225,7 +224,7 @@ bool WMWindow::prepareImageForUpload(const QString& imgPath, QString& caption)
 void WMWindow::slotStartTransfer()
 {
     saveSettings();
-    KUrl::List urls = m_interface->currentSelection().images();
+    KUrl::List urls = iface()->currentSelection().images();
 
     QList<QMap<QString, QString> > imageDesc;
 
@@ -235,21 +234,24 @@ void WMWindow::slotStartTransfer()
     for (int i = 0; i < urls.size(); ++i)
     {
 
-
+        QMap<QString, QString> map;
         QString caption;
-
+        QString url;
         if(m_widget->resize()){
 
             prepareImageForUpload(urls.at(i).path(), caption);
 
-
+            url = m_tmpPath;
+        }else{
+            url = urls.at(i).path();
         }
+
 
         QMap<QString, QString> map;
         map=imagesDesc.value(urls.at(i).path());
         kDebug()<<urls.at(i).path();
 
-        /*map["url"]         = urls.at(i).path();
+        map["url"]         = urls.at(i).path();
         map["license"]     = license;
         map["author"]      = author;
         map["description"] = description;
@@ -257,15 +259,6 @@ void WMWindow::slotStartTransfer()
         qCritical("windows slotStartTras");
 
         map["categories"] = categories;
-
-        if(info.hasGeolocationInfo())
-        {
-            map["latitude"]  = QString::number(info.latitude());
-            map["longitude"] = QString::number(info.longitude());
-            map["altitude"]  = QString::number(info.altitude());
-            if(!caption.isEmpty())
-             map["caption"] = caption;
-        }*/
 
         imageDesc << map;
     }
@@ -321,7 +314,7 @@ int WMWindow::slotLoginHandle(KJob* loginJob)
     }
     else
     {
-        m_uploadJob = new WikiMediaJob(m_interface, m_mediawiki, this);
+        m_uploadJob = new WikiMediaJob(iface(), m_mediawiki, this);
         enableButton(User1, true);
         m_widget->invertAccountLoginBox();
         m_widget->updateLabels(m_login, m_wiki.toString());
