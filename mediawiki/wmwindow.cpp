@@ -228,11 +228,10 @@ void WMWindow::slotStartTransfer()
     KUrl::List urls = m_interface->currentSelection().images();
 
     QList<QMap<QString, QString> > imageDesc;
-    QString author  = m_widget->author();
-    QString license = m_widget->license();
-    QString categories = m_widget->categories();
-    QString description = m_widget->description();
-    QString date = m_widget->date();
+
+    QMap <QString,QMap <QString,QString> > imagesDesc=m_widget->allImagesDesc();
+
+
     for (int i = 0; i < urls.size(); ++i)
     {
 
@@ -246,10 +245,11 @@ void WMWindow::slotStartTransfer()
 
         }
 
-        KPImageInfo info(urls.at(i));
         QMap<QString, QString> map;
+        map=imagesDesc.value(urls.at(i).path());
+        kDebug()<<urls.at(i).path();
 
-        map["url"]         = urls.at(i).path();
+        /*map["url"]         = urls.at(i).path();
         map["license"]     = license;
         map["author"]      = author;
         map["description"] = description;
@@ -263,9 +263,9 @@ void WMWindow::slotStartTransfer()
             map["latitude"]  = QString::number(info.latitude());
             map["longitude"] = QString::number(info.longitude());
             map["altitude"]  = QString::number(info.altitude());
-          /*  if(!caption.isEmpty())
-             map["caption"] = caption;*/
-        }
+            if(!caption.isEmpty())
+             map["caption"] = caption;
+        }*/
 
         imageDesc << map;
     }

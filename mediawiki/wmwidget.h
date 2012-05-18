@@ -125,12 +125,8 @@ private Q_SLOTS:
     void slotLoginClicked();
     void slotNewWikiClicked();
     void slotAddWikiClicked();
-    void slotApplyDescriptionClicked(const QString imageFile);
-    void slotApplyTitleClicked(const QString imageFile);
-    void slotApplyDateClicked(const QString imageFile);
-    void slotApplyLongitudeClicked(const QString imageFile);
-    void slotApplyLatitudeClicked(const QString imageFile);
-    void slotApplyCategoryClicked(const QString imageFile);
+    void slotApplyToAllImages();
+    void slotApplyToSelectedImages();
 
 
 private:

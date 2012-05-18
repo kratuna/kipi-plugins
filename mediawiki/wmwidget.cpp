@@ -55,6 +55,8 @@
 // LibKIPI includes
 
 #include <libkipi/uploadwidget.h>
+#include <libkipi/interface.h>
+#include <libkipi/imagecollectionselector.h>
 
 // libKdcraw includes
 
@@ -484,6 +486,15 @@ WmWidget::WmWidget(QWidget* const parent)
 
     connect(addWikiBtn, SIGNAL(clicked()),
             this, SLOT(slotAddWikiClicked()));
+
+    connect(applyAllBtn ,SIGNAL(clicked()),
+            this,SLOT(slotApplyToAllImages()));
+
+    connect(applySelectBtn ,SIGNAL(clicked()),
+            this,SLOT(slotApplyToSelectedImages()));
+
+
+
 }
 
 WmWidget::~WmWidget()
@@ -626,14 +637,21 @@ void WmWidget::slotAddWikiClicked()
 void WmWidget::prepareImagesDesc(){
 
 
+
+
+
+}
+
+/* Apply the options to all images */
+void WmWidget::slotApplyToAllImages()
+{
+
     KUrl::List urls = m_imgList->imageUrls();
 
 
     for (int i = 0; i < urls.size(); ++i)
     {
-        KPImageInfo info(urls.at(i));
 
-        QStringList keywar = info.keywords();
 
         QMap<QString, QString> imageMetaData;
 
@@ -641,16 +659,15 @@ void WmWidget::prepareImagesDesc(){
         imageMetaData["url"]         = urls.at(i).path();
         imageMetaData["license"]     = this->license();
         imageMetaData["author"]      = this->author();
-        imageMetaData["description"] = info.description();
-        imageMetaData["time"]        = info.date().toString(Qt::ISODate);
+        imageMetaData["description"] = m_descEdit->text();
+        imageMetaData["time"]        = m_dateEdit->text();
+        imageMetaData["categories"] = m_categoryEdit->text();
 
 
-        if(info.hasGeolocationInfo())
-        {
-            imageMetaData["latitude"]  = QString::number(info.latitude());
-            imageMetaData["longitude"] = QString::number(info.longitude());
-            imageMetaData["altitude"]  = QString::number(info.altitude());
-        }
+        imageMetaData["latitude"]  = m_latitudeEdit->text();
+        imageMetaData["longitude"] = m_longitudeEdit->text();
+
+
 
         m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
     }
@@ -658,45 +675,47 @@ void WmWidget::prepareImagesDesc(){
 
 
 }
-/* Slot used to apply the descripton settings for the selected image */
-void WmWidget::slotApplyDescriptionClicked(const QString imageFile)
+
+
+/* Apply the options to selected images */
+void WmWidget::slotApplyToSelectedImages()
+
 {
-    m_imagesDescInfo.take(imageFile)["description"] = m_descEdit->text();
+    /* TODO
+
+    KUrl::List urls = images.images();
+
+
+    for (int i = 0; i < urls.size(); ++i)
+
+
+    {
+
+
+        QMap<QString, QString> imageMetaData;
+        kDebug()<<"Selected images names\n"<<urls.at(i).path();
+
+        imageMetaData["url"]         = urls.at(i).path();
+        imageMetaData["license"]     = this->license();
+        imageMetaData["author"]      = this->author();
+        imageMetaData["description"] = m_descEdit->text();
+        imageMetaData["time"]        = m_dateEdit->text();
+        imageMetaData["categories"] = m_categoryEdit->text();
+
+
+        imageMetaData["latitude"]  = m_latitudeEdit->text();
+        imageMetaData["longitude"] = m_longitudeEdit->text();
+
+
+
+        m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
+    }
+    */
 
 }
 
-void WmWidget::slotApplyTitleClicked(const QString imageFile)
-{
-    m_imagesDescInfo.take(imageFile)["title"] = m_titleEdit->text();
 
-}
-
-void WmWidget::slotApplyDateClicked(const QString imageFile)
-{
-    m_imagesDescInfo.take(imageFile)["time"]= m_dateEdit->text();
-}
-
-void WmWidget::slotApplyLongitudeClicked(const QString imageFile)
-{
-    m_imagesDescInfo.take(imageFile)["longitude"]= m_longitudeEdit->text();
-}
-
-void WmWidget::slotApplyLatitudeClicked(const QString imageFile)
-{
-m_imagesDescInfo.take(imageFile)["latitude"]= m_latitudeEdit->text();
-
-}
-/* Works only with one category*/
-/*TODO split category with "," or ";" */
-void WmWidget::slotApplyCategoryClicked(const QString imageFile)
-{
-    m_imagesDescInfo.take(imageFile)["category"]= m_categoryEdit->text();
-
-}
-
-
-
-QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc() const
+QMap <QString,QMap <QString,QString> > WmWidget:: allImagesDesc()  const
 {
     return m_imagesDescInfo;
 }
