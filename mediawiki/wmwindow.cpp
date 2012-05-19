@@ -83,6 +83,7 @@ WMWindow::WMWindow(const QString& tmpFolder, QWidget* const /*parent*/)
                               i18n("Start upload to Wikimedia Commons")));
     enableButton(User1, false);
     m_widget->setMinimumSize(700, 500);
+     m_widget->installEventFilter(this);
 
     KPAboutData* about = new KPAboutData(ki18n("Wikimedia Commons Export"), 0,
                                          KAboutData::License_GPL,
@@ -246,19 +247,9 @@ void WMWindow::slotStartTransfer()
             url = urls.at(i).path();
         }
 
-
-        QMap<QString, QString> map;
         map=imagesDesc.value(urls.at(i).path());
         kDebug()<<urls.at(i).path();
 
-        map["url"]         = urls.at(i).path();
-        map["license"]     = license;
-        map["author"]      = author;
-        map["description"] = description;
-        map["time"]        = date;
-        qCritical("windows slotStartTras");
-
-        map["categories"] = categories;
 
         imageDesc << map;
     }
@@ -336,5 +327,23 @@ void WMWindow::slotEndUpload()
     m_widget->progressBar()->progressCompleted();
     hide();
 }
+bool WMWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::KeyRelease)
+    {
+
+        QKeyEvent *c = dynamic_cast<QKeyEvent *>(event);
+        if(c && c->key() == Qt::Key_Return)
+        {
+            event->ignore();
+            kDebug()<<"Key event pass";
+            return false;
+
+        }
+
+    }
+    return true;
+}
+
 
 } // namespace KIPIWikiMediaPlugin

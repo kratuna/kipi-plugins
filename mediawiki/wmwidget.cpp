@@ -56,7 +56,6 @@
 
 #include <libkipi/uploadwidget.h>
 #include <libkipi/interface.h>
-#include <libkipi/imagecollectionselector.h>
 
 // libKdcraw includes
 
