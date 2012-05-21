@@ -108,6 +108,7 @@ void Plugin_WikiMedia::slotExport()
     {
         // We clean it up in the close button
         m_dlgExport = new WMWindow(tmp, kapp->activeWindow());
+        m_dlgExport->installEventFilter(this);
     }
     else
     {

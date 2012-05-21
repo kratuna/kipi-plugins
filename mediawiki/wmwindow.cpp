@@ -82,6 +82,7 @@ WMWindow::WMWindow(const QString& tmpFolder, QWidget* const /*parent*/)
                               i18n("Start upload to Wikimedia Commons")));
     enableButton(User1, false);
     m_widget->setMinimumSize(700, 500);
+     m_widget->installEventFilter(this);
 
     KPAboutData* about = new KPAboutData(ki18n("Wikimedia Commons Export"), 0,
                                          KAboutData::License_GPL,
@@ -226,11 +227,10 @@ void WMWindow::slotStartTransfer()
     KUrl::List urls = iface()->currentSelection().images();
 
     QList<QMap<QString, QString> > imageDesc;
-    QString author  = m_widget->author();
-    QString license = m_widget->license();
-    QString categories = m_widget->categories();
-    QString description = m_widget->description();
-    QString date = m_widget->date();
+
+    QMap <QString,QMap <QString,QString> > imagesDesc=m_widget->allImagesDesc();
+
+
     for (int i = 0; i < urls.size(); ++i)
     {
 
@@ -246,26 +246,9 @@ void WMWindow::slotStartTransfer()
             url = urls.at(i).path();
         }
 
-        map["url"]         = url;
+        map=imagesDesc.value(urls.at(i).path());
+        kDebug()<<urls.at(i).path();
 
-        KPImageInfo info(urls.at(i));
-
-        map["license"]     = license;
-        map["author"]      = author;
-        map["description"] = description;
-        map["time"]        = date;
-        qCritical("windows slotStartTras");
-
-        map["categories"] = categories;
-
-        if(info.hasGeolocationInfo())
-        {
-            map["latitude"]  = QString::number(info.latitude());
-            map["longitude"] = QString::number(info.longitude());
-            map["altitude"]  = QString::number(info.altitude());
-          /*  if(!caption.isEmpty())
-             map["caption"] = caption;*/
-        }
 
         imageDesc << map;
     }
@@ -343,5 +326,23 @@ void WMWindow::slotEndUpload()
     m_widget->progressBar()->progressCompleted();
     hide();
 }
+bool WMWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::KeyRelease)
+    {
+
+        QKeyEvent *c = dynamic_cast<QKeyEvent *>(event);
+        if(c && c->key() == Qt::Key_Return)
+        {
+            event->ignore();
+            kDebug()<<"Key event pass";
+            return false;
+
+        }
+
+    }
+    return true;
+}
+
 
 } // namespace KIPIWikiMediaPlugin

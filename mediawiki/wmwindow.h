@@ -64,6 +64,7 @@ public:
     void reactivate();
     QString getImageCaption(const QString& fileName);
     bool prepareImageForUpload(const QString& imgPath,QString& caption);
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private Q_SLOTS:
 
