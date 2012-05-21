@@ -40,7 +40,6 @@
 #include <kcombobox.h>
 #include <kpushbutton.h>
 #include <kmessagebox.h>
-
 // Mediawiki includes
 
 #include <libmediawiki/version.h>

@@ -97,6 +97,7 @@ public:
 
     KPProgressWidget* progressBar() const;
 
+    QString title() const;
     QString author() const;
     int dimension() const;
     int quality() const;
@@ -125,12 +126,8 @@ private Q_SLOTS:
     void slotLoginClicked();
     void slotNewWikiClicked();
     void slotAddWikiClicked();
-    void slotApplyDescriptionClicked(const QString imageFile);
-    void slotApplyTitleClicked(const QString imageFile);
-    void slotApplyDateClicked(const QString imageFile);
-    void slotApplyLongitudeClicked(const QString imageFile);
-    void slotApplyLatitudeClicked(const QString imageFile);
-    void slotApplyCategoryClicked(const QString imageFile);
+    void slotLoadImagesDesc();
+    void slotApplyImagesDesc();
 
 
 private:
