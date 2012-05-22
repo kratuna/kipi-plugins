@@ -483,25 +483,13 @@ WmWidget::WmWidget(QWidget* const parent)
 
     connect(addWikiBtn, SIGNAL(clicked()),
             this, SLOT(slotAddWikiClicked()));
-<<<<<<< HEAD
     connect(applySelectBtn, SIGNAL(clicked()),
             this, SLOT(slotApplyImagesDesc()));
 
     //--Le SIGNAL recup par l'imageList ne semble pas etre le bon ( ou probleme au niveau du QTree passé en param... )
 
-    connect(m_imgList, SIGNAL(signalItemClicked(this)),
+    connect(m_imgList, SIGNAL(signalItemClicked(m_imgList.view().findItem(m_imgList->imageUrls(true)))),
             this, SLOT(slotLoadImagesDesc()));
-=======
-
-    connect(applyAllBtn ,SIGNAL(clicked()),
-            this,SLOT(slotApplyToAllImages()));
-
-    connect(applySelectBtn ,SIGNAL(clicked()),
-            this,SLOT(slotApplyToSelectedImages()));
-
-
-
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
 }
 
 WmWidget::~WmWidget()
@@ -642,9 +630,6 @@ void WmWidget::slotAddWikiClicked()
 
 }
 
-
-
-<<<<<<< HEAD
 void WmWidget::slotLoadImagesDesc(){
 
     //--recuperation des information de la map dans les Edit a chaque changement de la selection
@@ -680,22 +665,11 @@ void WmWidget::slotLoadImagesDesc(){
 void WmWidget::slotApplyImagesDesc(){
 
     //-- enregistrement des edit dans la map
-=======
-
-
-}
-
-/* Apply the options to all images */
-void WmWidget::slotApplyToAllImages()
-{
-
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
     KUrl::List urls = m_imgList->imageUrls();
 
 
     for (int i = 0; i < urls.size(); ++i)
     {
-<<<<<<< HEAD
         KPImageInfo info(urls.at(i));
         QMap<QString, QString> imageMetaData;
         QString url = urls.at(i).path();
@@ -704,49 +678,28 @@ void WmWidget::slotApplyToAllImages()
             url = url + ".jpg";
         }
         imageMetaData["url"]   = url;
-=======
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
 
 
 
         if(m_dateCheck->isChecked())
             imageMetaData["time"] = this->date();
 
-<<<<<<< HEAD
         if(m_categoryCheck->isChecked())
             imageMetaData["categories"] = this->categories();
-=======
-        imageMetaData["url"]         = urls.at(i).path();
-        imageMetaData["license"]     = this->license();
-        imageMetaData["author"]      = this->author();
-        imageMetaData["description"] = m_descEdit->text();
-        imageMetaData["time"]        = m_dateEdit->text();
-        imageMetaData["categories"] = m_categoryEdit->text();
-
-
-        imageMetaData["latitude"]  = m_latitudeEdit->text();
-        imageMetaData["longitude"] = m_longitudeEdit->text();
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
-
         if(m_descCheck->isChecked())
             imageMetaData["description"] = info.description();
 
-<<<<<<< HEAD
         if(info.hasGeolocationInfo())
         {
             imageMetaData["latitude"]  = QString::number(info.latitude());
             imageMetaData["longitude"] = QString::number(info.longitude());
             imageMetaData["altitude"]  = QString::number(info.altitude());
         }
-=======
-
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
         m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
     }
 
 KMessageBox::error(this, i18n("Apply Ok."));
 
-<<<<<<< HEAD
 }
 
 
@@ -758,51 +711,6 @@ QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc() const
 
 
 QString WmWidget::title() const
-=======
-
-}
-
-
-/* Apply the options to selected images */
-void WmWidget::slotApplyToSelectedImages()
-
-{
-    /* TODO
-
-    KUrl::List urls = images.images();
-
-
-    for (int i = 0; i < urls.size(); ++i)
-
-
-    {
-
-
-        QMap<QString, QString> imageMetaData;
-        kDebug()<<"Selected images names\n"<<urls.at(i).path();
-
-        imageMetaData["url"]         = urls.at(i).path();
-        imageMetaData["license"]     = this->license();
-        imageMetaData["author"]      = this->author();
-        imageMetaData["description"] = m_descEdit->text();
-        imageMetaData["time"]        = m_dateEdit->text();
-        imageMetaData["categories"] = m_categoryEdit->text();
-
-
-        imageMetaData["latitude"]  = m_latitudeEdit->text();
-        imageMetaData["longitude"] = m_longitudeEdit->text();
-
-
-
-        m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
-    }
-    */
-
-}
-
-
-QMap <QString,QMap <QString,QString> > WmWidget:: allImagesDesc()  const
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
 {
     kDebug() << "WmWidget::author()";
     return m_titleEdit->text();

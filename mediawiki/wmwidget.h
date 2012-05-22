@@ -126,13 +126,8 @@ private Q_SLOTS:
     void slotLoginClicked();
     void slotNewWikiClicked();
     void slotAddWikiClicked();
-<<<<<<< HEAD
     void slotLoadImagesDesc();
     void slotApplyImagesDesc();
-=======
-    void slotApplyToAllImages();
-    void slotApplyToSelectedImages();
->>>>>>> 2bf9bbe6fb0a8c4b47cc6650f5a5930d4607cbf1
 
 
 private:
