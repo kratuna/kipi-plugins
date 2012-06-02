@@ -63,7 +63,7 @@ void WikiMediaJob::begin()
     start();
 }
 
-void WikiMediaJob::setImageMap(const QList<QMap<QString, QString> >& imageDesc)
+void WikiMediaJob::setImageMap(const QMap <QString,QMap <QString,QString> >& imageDesc)
 {
     m_imageDesc = imageDesc;
 }
@@ -97,22 +97,25 @@ void WikiMediaJob::uploadHandle(KJob* j)
     }
 
     // upload next image
-    if(m_imageDesc.size() > 0)
+    if(!m_imageDesc.isEmpty())
     {
-        QMap<QString,QString> info = m_imageDesc.takeFirst();
+        QList<QString> keys=m_imageDesc.keys();
+
+        QMap<QString,QString> info = m_imageDesc.take(keys.first());
         Upload* e1      = new Upload( *m_mediawiki, this);
 
-        kDebug() << "image path : " << info["url"];
+        kDebug() << "image path : " << keys.first();
 
-        QFile* file = new QFile(info["url"],this);
+        QFile* file = new QFile(keys.first(),this);
         file->open(QIODevice::ReadOnly);
         //emit fileUploadProgress(done = 0, total file.size());
 
         e1->setFile(file);
         m_currentFile=file->fileName();
-        kDebug() << "image name : " << file->fileName().split('/').last();
-        e1->setFilename(file->fileName());
+        kDebug() << "image name : " << file->fileName();
+        e1->setFilename(info["title"]);
         e1->setText(buildWikiText(info));
+        keys.removeFirst();
 
         connect(e1, SIGNAL(result(KJob*)),
                 this, SLOT(uploadHandle(KJob*)));

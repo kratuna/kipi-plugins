@@ -60,7 +60,7 @@ public:
     WikiMediaJob(Interface* const interface, MediaWiki* const mediawiki, QObject* const parent=0);
     QString buildWikiText(const QMap<QString, QString>& info);
 
-    void setImageMap(const QList<QMap<QString, QString> >& imageDesc);
+    void setImageMap(const QMap <QString,QMap <QString,QString> >& imageDesc);
     void start();
 
 Q_SIGNALS:
@@ -79,7 +79,7 @@ private:
     KUrl::List                    m_urls;
     Interface*                    m_interface;
     MediaWiki*                    m_mediawiki;
-    QList<QMap<QString,QString> > m_imageDesc;
+    QMap <QString,QMap <QString,QString> > m_imageDesc;
     QString                       m_error;
     QString                       m_currentFile;
 };

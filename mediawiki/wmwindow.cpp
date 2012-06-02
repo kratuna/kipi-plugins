@@ -226,7 +226,6 @@ void WMWindow::slotStartTransfer()
     saveSettings();
     KUrl::List urls = iface()->currentSelection().images();
 
-    QList<QMap<QString, QString> > imageDesc;
 
     QMap <QString,QMap <QString,QString> > imagesDesc=m_widget->allImagesDesc();
 
@@ -234,7 +233,6 @@ void WMWindow::slotStartTransfer()
     for (int i = 0; i < urls.size(); ++i)
     {
 
-        QMap<QString, QString> map;
         QString caption;
         QString url;
         if(m_widget->resize()){
@@ -245,15 +243,9 @@ void WMWindow::slotStartTransfer()
         }else{
             url = urls.at(i).path();
         }
-
-        map=imagesDesc.value(urls.at(i).path());
-        kDebug()<<urls.at(i).path();
-
-
-        imageDesc << map;
     }
 
-    m_uploadJob->setImageMap(imageDesc);
+    m_uploadJob->setImageMap(imagesDesc);
 
     m_widget->progressBar()->setRange(0, 100);
     m_widget->progressBar()->setValue(0);

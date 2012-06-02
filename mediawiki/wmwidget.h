@@ -31,6 +31,7 @@
 #include <QScrollArea>
 #include <QComboBox>
 #include <QStringList>
+#include <QTreeWidgetItem>
 
 //KDE includes
 
@@ -111,7 +112,7 @@ public:
 
     void readSettings(KConfigGroup& group);
     void saveSettings(KConfigGroup& group);
-    void prepareImagesDesc();
+    void loadImageInfoFirstLoad();
 
 Q_SIGNALS:
 
@@ -126,7 +127,7 @@ private Q_SLOTS:
     void slotLoginClicked();
     void slotNewWikiClicked();
     void slotAddWikiClicked();
-    void slotLoadImagesDesc();
+    void slotLoadImagesDesc(QTreeWidgetItem* item);
     void slotApplyImagesDesc();
 
 

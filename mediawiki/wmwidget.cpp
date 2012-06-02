@@ -40,6 +40,7 @@
 #include <QScrollArea>
 #include <QMap>
 #include <QTabWidget>
+#include <QTreeWidgetItem>
 
 // KDE includes
 
@@ -125,40 +126,14 @@ WmWidget::WmWidget(QWidget* const parent)
     m_fileBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* fileBoxLayout = new QGridLayout(m_fileBox);
 
+    loadImageInfoFirstLoad();
 
-    QString currentCategories;
-    QString date ;
-    KUrl::List urls = m_imgList->imageUrls(false);
-    QString title;
-    QString description;
-    QString longitude;
-    QString latitude;
-
-    for(int j = 0; j < urls.size(); j++)
-    {
-        KPImageInfo info(urls.at(j).path());
-        QStringList keywar = info.keywords();
-        date = info.date().toString(Qt::ISODate);
-        date = date.replace("T", " ",Qt::CaseSensitive);
-        title = info.name();
-        description = info.title();
-        longitude = info.longitude();
-        latitude = info.latitude();
-        for( int i = 0; i < keywar.size(); i++)
-        {
-            if(i==keywar.size()-1){
-                currentCategories.append(keywar.at(i));
-            }else{
-                currentCategories.append(keywar.at(i)+", ");
-            }
-        }
-    }
-    m_titleEdit   = new KLineEdit(title, m_fileBox);
-    m_dateEdit   = new KLineEdit(date, m_fileBox);
-    m_categoryEdit   = new KLineEdit(currentCategories, m_fileBox);
-    m_descEdit   = new KLineEdit(description, m_fileBox);
-    m_longitudeEdit   = new KLineEdit(longitude, m_fileBox);
-    m_latitudeEdit   = new KLineEdit(latitude, m_fileBox);
+    m_titleEdit   = new KLineEdit("Select image", m_fileBox);
+    m_dateEdit   = new KLineEdit("Select image", m_fileBox);
+    m_categoryEdit   = new KLineEdit("Select image", m_fileBox);
+    m_descEdit   = new KLineEdit("Select image", m_fileBox);
+    m_longitudeEdit   = new KLineEdit("Select image", m_fileBox);
+    m_latitudeEdit   = new KLineEdit("Select image", m_fileBox);
 
     QLabel* titleLabel     = new QLabel(m_fileBox);
     titleLabel->setText(i18n("Title:"));
@@ -488,8 +463,12 @@ WmWidget::WmWidget(QWidget* const parent)
 
     //--Le SIGNAL recup par l'imageList ne semble pas etre le bon ( ou probleme au niveau du QTree passé en param... )
 
-    connect(m_imgList, SIGNAL(signalItemClicked(m_imgList.view().findItem(m_imgList->imageUrls(true)))),
-            this, SLOT(slotLoadImagesDesc()));
+   /*connect(m_imgList, SIGNAL(signalItemClicked(QTreeWidgetItem*)),
+            this, SLOT(slotBuildSelectedList(QTreeWidgetItem*)));
+            */
+    connect(m_imgList, SIGNAL(signalItemClicked(QTreeWidgetItem*)),
+            this, SLOT(slotLoadImagesDesc(QTreeWidgetItem*)));
+
 }
 
 WmWidget::~WmWidget()
@@ -630,10 +609,9 @@ void WmWidget::slotAddWikiClicked()
 
 }
 
-void WmWidget::slotLoadImagesDesc(){
+void WmWidget::loadImageInfoFirstLoad(){
 
-    //--recuperation des information de la map dans les Edit a chaque changement de la selection
-    //Todo ajouter des test si nb imgSelect > 1
+    QString currentCategories;
     QString date ;
     KUrl::List urls = m_imgList->imageUrls(false);
     QString title;
@@ -641,10 +619,49 @@ void WmWidget::slotLoadImagesDesc(){
     QString longitude;
     QString latitude;
 
-    QString keywar;
     for(int j = 0; j < urls.size(); j++)
     {
-        QMap<QString, QString> imageMetaData = m_imagesDescInfo[urls.at(j).path()];
+        KPImageInfo info(urls.at(j).path());
+        QStringList keywar = info.keywords();
+        date = info.date().toString(Qt::ISODate);
+        date = date.replace("T", " ",Qt::CaseSensitive);
+        title = info.name();
+        description = info.title();
+        longitude = info.longitude();
+        latitude = info.latitude();
+        for( int i = 0; i < keywar.size(); i++)
+        {
+            if(i==keywar.size()-1){
+                currentCategories.append(keywar.at(i));
+            }else{
+                currentCategories.append(keywar.at(i)+", ");
+            }
+        }
+        QMap<QString, QString> imageMetaData;
+        imageMetaData["title"]   = title;
+        imageMetaData["time"] = date;
+        imageMetaData["categories"] = currentCategories;
+        imageMetaData["description"] = description;
+        imageMetaData["latitude"]  = latitude;
+        imageMetaData["longitude"] = longitude;
+        imageMetaData["altitude"]  = QString::number(info.altitude());
+        m_imagesDescInfo.insert(urls.at(j).path(),imageMetaData);
+    }
+
+}
+
+void WmWidget::slotLoadImagesDesc(QTreeWidgetItem* item){
+
+
+    KPImagesListViewItem* l_item = dynamic_cast<KPImagesListViewItem*>(item);
+    QString date ;
+    QString title;
+    QString description;
+    QString longitude;
+    QString latitude;
+
+    QString keywar;
+    QMap<QString, QString> imageMetaData = m_imagesDescInfo[l_item->url().path()];
         keywar = imageMetaData["categories"];
         date = imageMetaData["time"];
         date = date.replace("T", " ",Qt::CaseSensitive);
@@ -652,8 +669,8 @@ void WmWidget::slotLoadImagesDesc(){
         description = imageMetaData["description"];
         longitude = imageMetaData["longitude"];
         latitude = imageMetaData["latitude"];
-    }
-    m_titleEdit->setText("title");
+
+    m_titleEdit->setText(title);
     m_dateEdit->setText(date);
     m_categoryEdit->setText(keywar);
     m_descEdit->setText(description);
@@ -661,44 +678,45 @@ void WmWidget::slotLoadImagesDesc(){
     m_latitudeEdit->setText(latitude);
 
 }
-
 void WmWidget::slotApplyImagesDesc(){
 
     //-- enregistrement des edit dans la map
-    KUrl::List urls = m_imgList->imageUrls();
 
+    KUrl::List urls;
+    QList<QTreeWidgetItem *> selectedItems=m_imgList->listView()->selectedItems();
+
+    for (int i = 0; i < selectedItems.size(); ++i){
+        KPImagesListViewItem* l_item = dynamic_cast<KPImagesListViewItem*>(selectedItems.at(i));
+    urls.append(l_item->url());
+    }
 
     for (int i = 0; i < urls.size(); ++i)
     {
-        KPImageInfo info(urls.at(i));
+
         QMap<QString, QString> imageMetaData;
         QString url = urls.at(i).path();
         if(m_titleCheck->isChecked()){
-            url = this->title();
-            url = url + ".jpg";
+            url = title();
+            url = url +"."+urls.at(i).path().split('.').last();
+            kDebug()<<" Url in the if "<<url;
         }
-        imageMetaData["url"]   = url;
+        imageMetaData["title"]   = url;
+        kDebug()<<" Url after if "<<url;
 
-
-
-        if(m_dateCheck->isChecked())
-            imageMetaData["time"] = this->date();
-
-        if(m_categoryCheck->isChecked())
-            imageMetaData["categories"] = this->categories();
-        if(m_descCheck->isChecked())
-            imageMetaData["description"] = info.description();
-
-        if(info.hasGeolocationInfo())
-        {
-            imageMetaData["latitude"]  = QString::number(info.latitude());
-            imageMetaData["longitude"] = QString::number(info.longitude());
-            imageMetaData["altitude"]  = QString::number(info.altitude());
+        if(m_dateCheck->isChecked()){
+            imageMetaData["time"] = date();
         }
-        m_imagesDescInfo.insert(urls.at(i).path(),imageMetaData);
+        if(m_categoryCheck->isChecked()){
+            imageMetaData["categories"] = categories();
+        }
+        if(m_descCheck->isChecked()){
+            imageMetaData["description"] = description();
+        }
+        m_imagesDescInfo[urls.at(i).path()]=imageMetaData;
+
     }
 
-KMessageBox::error(this, i18n("Apply Ok."));
+KMessageBox::error(this, i18n("Applied to selection "));
 
 }
 
