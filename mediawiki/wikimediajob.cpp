@@ -164,9 +164,8 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
     text.append( "\n}}");
     QString altitude, longitude, latitude;
 
-    if(info.contains("latitude")  ||
-       info.contains("longitude") ||
-       info.contains("altitude"))
+    if(info.contains("latitude")  &&
+       info.contains("longitude"))
     {
         if(info.contains("latitude"))
             latitude = info["latitude"];
@@ -184,16 +183,21 @@ QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
         text.append( "\n}}");
     }
 
-    text.append( "\n== {{int:license-header}} ==\n");
+    text.append( "\n=={{int:license-header}}==\n");
     if(info.contains("license"))
         text.append( info["license"]).append("\n");
 
     if(info.contains("categories")){
         text.append("[[Category:Uploaded with KIPI uploader]]\n");
         QStringList categories = info["categories"].split(',');
+        QString tmp = "";
         for(int i = 0; i < categories.size(); i++){
             if(!categories.at(i).isEmpty())
-               text.append("[[Category: "+categories.at(i) +"]]\n");
+                tmp = categories.at(i);
+                while(tmp.startsWith(" ", Qt::CaseSensitive)){
+                    tmp.remove(0, 1);
+                }
+               text.append("[[Category:"+tmp +"]]\n");
         }
 
     }

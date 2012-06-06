@@ -182,8 +182,8 @@ WmWidget::WmWidget(QWidget* const parent)
 
     fileBoxLayout->addWidget(m_titleCheck, 1, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_dateCheck, 2, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_descCheck, 3, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_categoryCheck, 4, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_categoryCheck, 3, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_descCheck, 4, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_latitudeCheck, 5, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_longitudeCheck, 6, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(applySelectBtn,7,3,1,1);
@@ -629,6 +629,7 @@ void WmWidget::loadImageInfoFirstLoad(){
         description = info.title();
         longitude = info.longitude();
         latitude = info.latitude();
+        currentCategories = "";
         for( int i = 0; i < keywar.size(); i++)
         {
             if(i==keywar.size()-1){
@@ -694,14 +695,19 @@ void WmWidget::slotApplyImagesDesc(){
     {
 
         QMap<QString, QString> imageMetaData;
-        QString url = urls.at(i).path();
+        imageMetaData = m_imagesDescInfo[urls.at(i).path()];
+
         if(m_titleCheck->isChecked()){
+            QString url = urls.at(i).path().split('/').last();
             url = title();
-            url = url +"."+urls.at(i).path().split('.').last();
+            if(url.split('.').last().isEmpty()){
+                url = url +"."+urls.at(i).path().split('.').last();
+                m_titleEdit->setText(url);
+            }
             kDebug()<<" Url in the if "<<url;
+            imageMetaData["title"]   = url;
+            kDebug()<<" Url after if "<<url;
         }
-        imageMetaData["title"]   = url;
-        kDebug()<<" Url after if "<<url;
 
         if(m_dateCheck->isChecked()){
             imageMetaData["time"] = date();
@@ -716,14 +722,28 @@ void WmWidget::slotApplyImagesDesc(){
 
     }
 
-KMessageBox::error(this, i18n("Applied to selection "));
-
 }
 
 
 
-QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc() const
+QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc()
 {
+
+    KUrl::List urls = m_imgList->imageUrls(false);
+
+
+    for (int i = 0; i < urls.size(); ++i)
+    {
+
+        QMap<QString, QString> imageMetaData = m_imagesDescInfo[urls.at(i).path()];
+
+            imageMetaData["author"] = author();
+            imageMetaData["license"] = license();
+
+        m_imagesDescInfo[urls.at(i).path()]=imageMetaData;
+
+    }
+
     return m_imagesDescInfo;
 }
 
