@@ -137,6 +137,8 @@ void WMWindow::reactivate()
 {
     m_widget->imagesList()->listView()->clear();
     m_widget->imagesList()->loadImagesFromCurrentSelection();
+    m_widget->loadImageInfoFirstLoad();
+
     show();
 }
 
@@ -165,6 +167,9 @@ void WMWindow::saveSettings()
 
 void WMWindow::slotClose()
 {
+
+    m_widget->clearImagesDesc();
+
     m_widget->progressBar()->progressCompleted();
     saveSettings();
     done(Close);

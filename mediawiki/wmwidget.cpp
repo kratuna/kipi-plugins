@@ -725,6 +725,10 @@ void WmWidget::slotApplyImagesDesc(){
 }
 
 
+void WmWidget::clearImagesDesc()
+{
+    m_imagesDescInfo.clear();
+}
 
 QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc()
 {

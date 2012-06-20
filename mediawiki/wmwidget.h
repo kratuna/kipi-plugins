@@ -109,6 +109,7 @@ public:
     QString date() const;
 
     QMap <QString,QMap <QString,QString> > allImagesDesc();
+    void clearImagesDesc();
 
     void readSettings(KConfigGroup& group);
     void saveSettings(KConfigGroup& group);
