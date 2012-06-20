@@ -244,9 +244,9 @@ void WMWindow::slotStartTransfer()
 
             prepareImageForUpload(urls.at(i).path(), caption);
 
-            url = m_tmpPath;
-        }else{
-            url = urls.at(i).path();
+            ;
+            imagesDesc.insert(m_tmpPath, imagesDesc.take(urls.at(i).path()));
+
         }
     }
 
