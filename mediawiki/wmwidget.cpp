@@ -492,11 +492,10 @@ void WmWidget::readSettings(KConfigGroup& group)
 
     m_WikisHistory = group.readEntry("Wikis history", QStringList());
     m_UrlsHistory = group.readEntry("Urls history", QStringList());
+    kDebug() <<  "UrlHistory.size: " << m_UrlsHistory.size() << "; WikisHistory.size:" << m_WikisHistory.size();
 
-    if(m_UrlsHistory.size() != 0 && m_WikisHistory.size() != 0){
-        for(int i = 0 ; i < m_UrlsHistory.size() ; i++){
-            m_wikiSelect->addItem(m_WikisHistory.at(i),m_UrlsHistory.at(i));
-        }
+    for(int i = 0 ; i < m_UrlsHistory.size() && i < m_WikisHistory.size() ; i++){
+        m_wikiSelect->addItem(m_WikisHistory.at(i),m_UrlsHistory.at(i));
     }
 
 
