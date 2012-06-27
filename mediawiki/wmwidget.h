@@ -141,11 +141,11 @@ private:
     KHBox*                     m_uploadBox;
     QWidget*                   m_fileBox;
     KLineEdit*                 m_titleEdit;
-    KLineEdit*                 m_descEdit;
+    KTextEdit*                 m_descEdit;
     KLineEdit*                 m_dateEdit;
     KLineEdit*                 m_longitudeEdit;
     KLineEdit*                 m_latitudeEdit;
-    KLineEdit*                 m_categoryEdit;
+    KTextEdit*                 m_categoryEdit;
 
     QCheckBox*                 m_titleCheck;
     QCheckBox*                 m_descCheck;

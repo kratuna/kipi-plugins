@@ -122,31 +122,31 @@ WmWidget::WmWidget(QWidget* const parent)
     QWidget* uploadPanel = new QWidget(uploadBox);
     QVBoxLayout* uploadBoxLayout = new QVBoxLayout(uploadPanel);
 
-    m_fileBox   = new QWidget(uploadBox);
+    m_fileBox = new QWidget(uploadBox);
     m_fileBox->setWhatsThis(i18n("This is the login form to your Wikimedia account."));
     QGridLayout* fileBoxLayout = new QGridLayout(m_fileBox);
 
     loadImageInfoFirstLoad();
 
-    m_titleEdit   = new KLineEdit("Select image", m_fileBox);
-    m_dateEdit   = new KLineEdit("Select image", m_fileBox);
-    m_categoryEdit   = new KLineEdit("Select image", m_fileBox);
-    m_descEdit   = new KLineEdit("Select image", m_fileBox);
-    m_longitudeEdit   = new KLineEdit("Select image", m_fileBox);
-    m_latitudeEdit   = new KLineEdit("Select image", m_fileBox);
+    m_titleEdit = new KLineEdit(i18n("Select image"), m_fileBox);
+    m_dateEdit = new KLineEdit(i18n("Select image"), m_fileBox);
+    m_categoryEdit = new KTextEdit(i18n("Select image"), m_fileBox);
+    m_descEdit = new KTextEdit(i18n("Select image"), m_fileBox);
+    m_latitudeEdit = new KLineEdit(i18n("Select image"), m_fileBox);
+    m_longitudeEdit = new KLineEdit(i18n("Select image"), m_fileBox);
 
-    QLabel* titleLabel     = new QLabel(m_fileBox);
+    QLabel* titleLabel = new QLabel(m_fileBox);
     titleLabel->setText(i18n("Title:"));
-    QLabel* dateLabel     = new QLabel(m_fileBox);
-    dateLabel->setText(i18n("date:"));
-    QLabel* categoryLabel     = new QLabel(m_fileBox);
-    categoryLabel->setText(i18n("Category:"));
-    QLabel* descLabel     = new QLabel(m_fileBox);
-    descLabel->setText(i18n("description:"));
-    QLabel* longitudeLabel     = new QLabel(m_fileBox);
-    longitudeLabel->setText(i18n("Longitude:"));
-    QLabel* latitudeLabel     = new QLabel(m_fileBox);
+    QLabel* dateLabel = new QLabel(m_fileBox);
+    dateLabel->setText(i18n("Date:"));
+    QLabel* categoryLabel = new QLabel(m_fileBox);
+    categoryLabel->setText(i18n("Categories:"));
+    QLabel* descLabel = new QLabel(m_fileBox);
+    descLabel->setText(i18n("Description:"));
+    QLabel* latitudeLabel = new QLabel(m_fileBox);
     latitudeLabel->setText(i18n("Latitude:"));
+    QLabel* longitudeLabel = new QLabel(m_fileBox);
+    longitudeLabel->setText(i18n("Longitude:"));
 
     m_titleCheck = new QCheckBox(m_fileBox);
     m_dateCheck = new QCheckBox(m_fileBox);
@@ -155,44 +155,40 @@ WmWidget::WmWidget(QWidget* const parent)
     m_longitudeCheck = new QCheckBox(m_fileBox);
     m_latitudeCheck = new QCheckBox(m_fileBox);
 
-
-
     KPushButton* applySelectBtn       = new KPushButton(
             KGuiItem(i18n("Apply"), "list-add",
                      i18n("apply config to the selection")), m_fileBox);
-
-
 
     uploadBoxLayout->setSpacing(KDialog::spacingHint());
     uploadBoxLayout->addWidget(m_fileBox,0,Qt::AlignTop);
 
     fileBoxLayout->addWidget(titleLabel, 1, 0,1,1);
     fileBoxLayout->addWidget(dateLabel, 2, 0,1,1);
-    fileBoxLayout->addWidget(categoryLabel, 3, 0,1,1);
-    fileBoxLayout->addWidget(descLabel, 4, 0,1,1);
+    fileBoxLayout->addWidget(descLabel, 3, 0,1,1);
+    fileBoxLayout->addWidget(categoryLabel, 4, 0,1,1);
     fileBoxLayout->addWidget(latitudeLabel, 5, 0,1,1);
     fileBoxLayout->addWidget(longitudeLabel, 6, 0,1,1);
 
     fileBoxLayout->addWidget(m_titleEdit, 1, 1,1,3);
     fileBoxLayout->addWidget(m_dateEdit, 2, 1,1,3);
-    fileBoxLayout->addWidget(m_categoryEdit, 3, 1,1,3);
-    fileBoxLayout->addWidget(m_descEdit, 4, 1,1,3);
+    fileBoxLayout->addWidget(m_descEdit, 3, 1,1,3);
+    fileBoxLayout->addWidget(m_categoryEdit, 4, 1,1,3);
     fileBoxLayout->addWidget(m_latitudeEdit, 5, 1,1,3);
     fileBoxLayout->addWidget(m_longitudeEdit, 6, 1,1,3);
 
     fileBoxLayout->addWidget(m_titleCheck, 1, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_dateCheck, 2, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_categoryCheck, 3, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(m_descCheck, 4, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_descCheck, 3, 4,1,1,Qt::AlignCenter);
+    fileBoxLayout->addWidget(m_categoryCheck, 4, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_latitudeCheck, 5, 4,1,1,Qt::AlignCenter);
     fileBoxLayout->addWidget(m_longitudeCheck, 6, 4,1,1,Qt::AlignCenter);
-    fileBoxLayout->addWidget(applySelectBtn,7,3,1,1);
+    fileBoxLayout->addWidget(applySelectBtn, 7, 3,1,1);
 
 
      // *****************************Tab Config****************************************
 
     QScrollArea* config = new QScrollArea(wrapper);
-    KVBox* panel2    = new KVBox(config->viewport());
+    KVBox* panel2 = new KVBox(config->viewport());
     panel2->setAutoFillBackground(false);
     config->setWidget(panel2);
     config->setWidgetResizable(true);
@@ -213,41 +209,27 @@ WmWidget::WmWidget(QWidget* const parent)
     m_passwdEdit = new KLineEdit(m_loginBox);
     m_passwdEdit->setEchoMode(KLineEdit::Password);
 
-    m_wikiSelect->addItem(i18n("kamelopedia"),
-                                              QString("http://kamelopedia.mormo.org/api.php"));
-    m_wikiSelect->addItem(i18n("MediaWiki"),
-                                              QString("http://www.mediawiki.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikia:foto"),
-                                              QString("http://foto.wikia.com/api.php"));
-    m_wikiSelect->addItem(i18n("Wikia:uncyclopedia"),
-                                              QString("http://uncyclopedia.wikia.com/api.php"));
-    m_wikiSelect->addItem(i18n("Wikimedia:commons"),
-                                              QString("http://commons.wikimedia.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikimedia:meta"),
-                                              QString("http://meta.wikimedia.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikibooks"),
-                                              QString("http://en.wikibooks.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikinews"),
-                                              QString("http://en.wikinews.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikipedia"),
-                                              QString("http://en.wikipedia.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikiquote"),
-                                              QString("http://en.wikiquote.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wikisource"),
-                                              QString("http://en.wikinews.org/w/api.php"));
-    m_wikiSelect->addItem(i18n("Wiktionary"),
-                                              QString("http://en.wiktionary.org/w/api.php"));
-
+    m_wikiSelect->addItem(i18n("kamelopedia"), QString("http://kamelopedia.mormo.org/api.php"));
+    m_wikiSelect->addItem(i18n("MediaWiki"), QString("http://www.mediawiki.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikia:foto"), QString("http://foto.wikia.com/api.php"));
+    m_wikiSelect->addItem(i18n("Wikia:uncyclopedia"), QString("http://uncyclopedia.wikia.com/api.php"));
+    m_wikiSelect->addItem(i18n("Wikimedia:commons"), QString("http://commons.wikimedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikimedia:meta"), QString("http://meta.wikimedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikibooks"), QString("http://en.wikibooks.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikinews"), QString("http://en.wikinews.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikipedia"), QString("http://en.wikipedia.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikiquote"), QString("http://en.wikiquote.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wikisource"), QString("http://en.wikinews.org/w/api.php"));
+    m_wikiSelect->addItem(i18n("Wiktionary"), QString("http://en.wiktionary.org/w/api.php"));
 
     m_wikiSelect->setEditable(false);
 
 
-    QLabel* wikiLabel     = new QLabel(m_loginBox);
+    QLabel* wikiLabel = new QLabel(m_loginBox);
     wikiLabel->setText(i18n("Wiki:"));
 
-    KPushButton* newWikiBtn       = new KPushButton(
-            KGuiItem(i18n("New"), "list-add",
-                     i18n("Create new wiki")), m_loginBox);
+    KPushButton* newWikiBtn = new KPushButton(
+            KGuiItem(i18n("New"), "list-add", i18n("Create new wiki")), m_loginBox);
 
 //---newWiki---
 
@@ -272,15 +254,11 @@ WmWidget::WmWidget(QWidget* const parent)
     QLabel*  newWikiUrlLabel     = new QLabel(newWikiPanel);
     newWikiUrlLabel->setText(i18n("Url:"));
 
-
     m_newWikiNameEdit = new KLineEdit(newWikiPanel);
-
     m_newWikiUrlEdit = new KLineEdit(newWikiPanel);
 
-
-    KPushButton* addWikiBtn       = new KPushButton(
-            KGuiItem(i18n("Add"), "list-add",
-                     i18n("add new wiki")), newWikiPanel);
+    KPushButton* addWikiBtn = new KPushButton(
+            KGuiItem(i18n("Add"), "list-add", i18n("Add a new wiki")), newWikiPanel);
 
 
     newWikiLayout->addWidget(newWikiNameLabel, 0, 0, 1, 1);
@@ -288,9 +266,6 @@ WmWidget::WmWidget(QWidget* const parent)
     newWikiLayout->addWidget(newWikiUrlLabel, 1, 0, 1, 1);
     newWikiLayout->addWidget(m_newWikiUrlEdit, 1, 1, 1, 1);
     newWikiLayout->addWidget(addWikiBtn, 2, 1, 1, 1);
-
-
-
 
     QLabel* nameLabel     = new QLabel(m_loginBox);
     nameLabel->setText(i18n( "Login:" ));
@@ -623,7 +598,7 @@ void WmWidget::loadImageInfoFirstLoad(){
         KPImageInfo info(urls.at(j).path());
         QStringList keywar = info.keywords();
         date = info.date().toString(Qt::ISODate);
-        date = date.replace("T", " ",Qt::CaseSensitive);
+        date = date.replace("T", " ", Qt::CaseSensitive);
         title = info.name();
         description = info.title();
         longitude = info.longitude();
@@ -633,12 +608,12 @@ void WmWidget::loadImageInfoFirstLoad(){
         {
             if(i==keywar.size()-1){
                 currentCategories.append(keywar.at(i));
-            }else{
-                currentCategories.append(keywar.at(i)+", ");
+            } else {
+                currentCategories.append(keywar.at(i)).append("\n");
             }
         }
         QMap<QString, QString> imageMetaData;
-        imageMetaData["title"]   = title;
+        imageMetaData["title"] = title;
         imageMetaData["time"] = date;
         imageMetaData["categories"] = currentCategories;
         imageMetaData["description"] = description;
@@ -664,7 +639,7 @@ void WmWidget::slotLoadImagesDesc(QTreeWidgetItem* item){
     QMap<QString, QString> imageMetaData = m_imagesDescInfo[l_item->url().path()];
         keywar = imageMetaData["categories"];
         date = imageMetaData["time"];
-        date = date.replace("T", " ",Qt::CaseSensitive);
+        date = date.replace("T", " ", Qt::CaseSensitive);
         title = imageMetaData["title"];
         description = imageMetaData["description"];
         longitude = imageMetaData["longitude"];
@@ -753,7 +728,7 @@ QMap <QString,QMap <QString,QString> > WmWidget::allImagesDesc()
 
 QString WmWidget::title() const
 {
-    kDebug() << "WmWidget::author()";
+    kDebug() << "WmWidget::title()";
     return m_titleEdit->text();
 }
 
@@ -788,12 +763,12 @@ QString WmWidget::license() const
 QString WmWidget::categories() const
 {
     kDebug() << "WmWidget::categories()";
-    return m_categoryEdit->text();
+    return m_categoryEdit->toPlainText();
 }
 QString WmWidget::description() const
 {
     kDebug() << "WmWidget::description()";
-    return m_descEdit->text();
+    return m_descEdit->toPlainText();
 
 }
 QString WmWidget::date() const

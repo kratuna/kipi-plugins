@@ -102,7 +102,7 @@ void WikiMediaJob::uploadHandle(KJob* j)
         QList<QString> keys=m_imageDesc.keys();
 
         QMap<QString,QString> info = m_imageDesc.take(keys.first());
-        Upload* e1      = new Upload( *m_mediawiki, this);
+        Upload* e1 = new Upload(*m_mediawiki, this);
 
         kDebug() << "image path : " << keys.first();
 
@@ -143,63 +143,41 @@ void WikiMediaJob::uploadHandle(KJob* j)
 
 QString WikiMediaJob::buildWikiText(const QMap<QString, QString>& info)
 {
-    QString text;
-    text.append("=={{int:filedesc}}==");
-    text.append( "\n{{Information");
-    text.append( "\n|Description=").append( "{{en|"+info["description"]+"}}");
-    text.append( "\n|Source=").append( "{{own}}");
-    text.append( "\n|Author=");
+    QString text = QString::fromUtf8("=={{int:filedesc}}==");
+    text.append("\n{{Information");
+    text.append("\n|Description=").append(info["description"].toUtf8());
+    text.append("\n|Source=").append("{{own}}");
+    text.append("\n|Author=");
 
-    if(info.contains("author"))
+    if(!info["author"].isEmpty())
     {
-        text.append( "[[");
-        text.append( info["author"]);
-        text.append( "]]");
+        text.append("[[");
+        text.append(info["author"].toUtf8());
+        text.append("]]");
     }
 
-    text.append( "\n|Date=").append(info["time"]);
-    text.append( "\n|Permission=");
-    text.append( "\n|other_versions=");
+    text.append("\n|Date=").append(info["time"].toUtf8());
+    text.append("\n|Permission=");
+    text.append("\n|other_versions=");
+    text.append("\n}}");
 
-    text.append( "\n}}");
-    QString altitude, longitude, latitude;
-
-    if(info.contains("latitude")  &&
-       info.contains("longitude"))
+    QString latitude = info["latitude"].toUtf8();
+    QString longitude = info["latitude"].toUtf8();
+    if(!latitude.isEmpty() && !longitude.isEmpty())
     {
-        if(info.contains("latitude"))
-            latitude = info["latitude"];
-        if(info.contains("longitude"))
-            longitude = info["longitude"];
-        if(info.contains("altitude"))
-            altitude = info["altitude"];
+	kDebug() << "Latitude: \"" << latitude << "\"; longitude: \"" << longitude << "\"";
+        text.append("\n{{Location dec").append("|").append(latitude).append("|").append(longitude).append("}}");
     }
 
-    if(!longitude.isEmpty() && !latitude.isEmpty())
-    {
-        text.append( "\n{{Location dec");
-        text.append( "\n|").append( longitude );
-        text.append( "\n|").append( latitude );
-        text.append( "\n}}");
-    }
+    text.append("\n\n=={{int:license-header}}==\n");
+    text.append(info["license"].toUtf8()).append("\n");
 
-    text.append( "\n=={{int:license-header}}==\n");
-    if(info.contains("license"))
-        text.append( info["license"]).append("\n");
-
-    if(info.contains("categories")){
-        text.append("[[Category:Uploaded with KIPI uploader]]\n");
-        QStringList categories = info["categories"].split(',');
-        QString tmp = "";
+    if(!info["categories"].isEmpty()){
+        text.append("\n[[Category:Uploaded with KIPI uploader]]\n");
+        QStringList categories = info["categories"].split("\n", QString::SkipEmptyParts);
         for(int i = 0; i < categories.size(); i++){
-            if(!categories.at(i).isEmpty())
-                tmp = categories.at(i);
-                while(tmp.startsWith(" ", Qt::CaseSensitive)){
-                    tmp.remove(0, 1);
-                }
-               text.append("[[Category:"+tmp +"]]\n");
+            text.append("[[Category:").append(categories[i].toUtf8()).append("]]\n");
         }
-
     }
 
 
